@@ -1,47 +1,74 @@
 body {
-padding-top: 15%;
+  padding-top: 15%;
 }
-div.center_view{
+
+div.center_view {
   width: 50%;
   margin: 0 auto;
   text-align: center;
 }
-div.left_org{
+
+div.left_org {
   float: left;
   width: 33.33333%;
   padding-left: 1%;
   padding-right: 1%;
   text-align: center
 }
-div.middle_org{
+
+div.middle_org {
   width: 33.33333%;
   padding-left: 1%;
   padding-right: 1%;
   display: inline-block;
   text-align: center;
-  border-left: 2px solid black;
-  border-right: 2px solid black;
+  border-left: 2px solid rgba(0, 0, 0, .5);
+  border-right: 2px solid rgba(0, 0, 0, .5);
 }
-div.right_org{
+
+div.right_org {
   float: right;
   width: 33.333333%;
   padding-left: 1%;
   padding-right: 1%;
   text-align: center;
 }
-.increase_margins{
+
+div.fixed_container {
+  padding-top: 20px;
+  height: 150px;
+  overflow: hidden;
+}
+
+.increase_margins {
   margin-bottom: 10px;
   margin-top: 10px;
   width: 40%;
 }
-.increase_padding{
+
+.increase_padding {
   padding-top: 3px;
   padding-bottom: 3px;
 }
-.left_shift_text{
+
+.left_shift_text {
   text-align: left;
 }
-.btn{
-background-color: #4285F4;
-border: none
+
+.link_no_runon {
+  display: block;
+  padding-right: 50px;
+  font-size: 20px;
+  overflow-wrap: anywhere;
+}
+
+.no_runon {
+  display: block;
+  padding-right: 50px;
+  overflow-wrap: anywhere;
+}
+
+.btn {
+  background-color: #4285F4;
+  border: none
 }

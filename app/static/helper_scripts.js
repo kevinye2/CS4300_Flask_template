@@ -76,34 +76,37 @@ function innerHTMLHandler(json_resp) {
   for (var i = 0; i < codes.length; i++) {
     checkBoxStatus[codes[i][2]] = [false, i + 1];
     codes_elem.insertAdjacentHTML("beforeend",
-      '<input type="checkbox"' +
+      '<div class="fixed_container"><input type="checkbox"' +
       'onchange="handleCheck(this)"' + 'id="' + codes[i][2] + '" ' +
-      'style="bottom: .42em; visibility: hidden" /><a target="_blank" href="' + codes[i][3] +
-      '" ' + 'style="font-size: 20">' +
-      codes[i][0] + '</a><span style="display: block">' +
-      codes[i][1] + '</span><br>'
+      'style="bottom: .42em; visibility: hidden" /><a target="_blank" href="' +
+      codes[i][3] + '">' + '<span class="link_no_runon">' +
+      codes[i][0].replace(new RegExp("\n", "g"), "<br>") + '</span>' +
+      '</a><span class="no_runon">' +
+      codes[i][1].replace(new RegExp("\n", "g"), "<br>") + '</span><br></div>'
     );
   }
   for (var i = 0; i < cases.length; i++) {
     checkBoxStatus[cases[i][2]] = [false, i + 1];
     cases_elem.insertAdjacentHTML("beforeend",
-      '<input type="checkbox"' +
+      '<div class="fixed_container"><input type="checkbox"' +
       'onchange="handleCheck(this)"' + 'id="' + cases[i][2] + '" ' +
-      'style="bottom: .42em; visibility: hidden" /><a target="_blank" href="' + cases[i][3] +
-      '" ' + 'style="font-size: 20">' +
-      cases[i][0] + '</a><span style="display: block">' +
-      cases[i][1] + '</span><br>'
+      'style="bottom: .42em; visibility: hidden" /><a target="_blank" href="' +
+      cases[i][3] + '">' + '<span class="link_no_runon">' +
+      cases[i][0].replace(new RegExp("\n", "g"), "<br>") + '</span>' +
+      '</a><span class="no_runon">' +
+      cases[i][1].replace(new RegExp("\n", "g"), "<br>") + '</span><br></div>'
     );
   }
   for (var i = 0; i < reddit.length; i++) {
     checkBoxStatus[reddit[i][2]] = [false, i + 1];
     reddit_elem.insertAdjacentHTML("beforeend",
-      '<input type="checkbox"' +
+      '<div class="fixed_container"><input type="checkbox"' +
       'onchange="handleCheck(this)"' + 'id="' + reddit[i][2] + '" ' +
-      'style="bottom: .42em; visibility: hidden" /><a target="_blank" href="' + reddit[i][3] +
-      '" ' + 'style="font-size: 20">' +
-      reddit[i][0] + '</a><span style="display: block">' +
-      reddit[i][1] + '</span><br>'
+      'style="bottom: .42em; visibility: hidden" /><a target="_blank" href="' +
+      reddit[i][3] + '">' + '<span class="link_no_runon">' +
+      reddit[i][0].replace(new RegExp("\n", "g"), "<br>") + '</span>' +
+      '</a><span class="no_runon">' +
+      reddit[i][1].replace(new RegExp("\n", "g"), "<br>") + '</span><br></div>'
     );
   }
   document.getElementById("results_area").setAttribute("style", "visibility: visible");
@@ -130,6 +133,8 @@ function clearInnerHTMLAndVariables() {
 function handleCheck(cb) {
   if (cb.checked) {
     checkBoxStatus[cb.id] = [true, checkBoxStatus[cb.id][1]]
+  } else {
+    checkBoxStatus[cb.id] = [false, checkBoxStatus[cb.id][1]]
   }
 }
 
