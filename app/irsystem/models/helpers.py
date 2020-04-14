@@ -1,5 +1,6 @@
-# Methods to compose HTTP response JSON 
+# Methods to compose HTTP response JSON
 from flask import jsonify
+from flask import Response
 import base64
 import json
 import numpy as np
@@ -14,14 +15,14 @@ def http_resource(result, name, bool=True):
 	return http_json(resp, bool)
 
 
-def http_errors(result): 
+def http_errors(result):
 	errors = { "data" : { "errors" : result.errors["_schema"] }}
 	return http_json(errors, False)
 
 class NumpyEncoder(json.JSONEncoder):
 
     def default(self, obj):
-        """If input object is an ndarray it will be converted into a dict 
+        """If input object is an ndarray it will be converted into a dict
         holding dtype, shape and the data, base64 encoded.
         """
         if isinstance(obj, np.ndarray):
@@ -37,7 +38,7 @@ class NumpyEncoder(json.JSONEncoder):
                         shape=obj.shape)
         # Let the base class default method raise the TypeError
         return json.JSONEncoder(self, obj)
-        
+
 def json_numpy_obj_hook(dct):
     """Decodes a previously encoded numpy ndarray with proper shape and dtype.
     :param dct: (dict) json encoded ndarray
