@@ -92,19 +92,29 @@
     <div class="left_org">
       <h4>Legal Statutes</h4>
       <div class="left_shift_text" id="codes_info"></div>
+      <div class="center_view">
+        <select class="increase_padding" id="codes_info_page_select" onchange="handlePageSelect(this)">
+        </select>
+      </div>
     </div>
     <div class="middle_org">
       <h4>Legal Cases</h4>
       <div class="left_shift_text" id="cases_info"></div>
+      <div class="center_view">
+        <select class="increase_padding" id="cases_info_page_select" onchange="handlePageSelect(this)">
+        </select>
+      </div>
     </div>
     <div class="right_org">
       <h4>Reddit Posts</h4>
       <div class="left_shift_text" id="reddit_info"></div>
+      <div class="center_view">
+        <select class="increase_padding" id="reddit_info_page_select" onchange="handlePageSelect(this)">
+        </select>
+      </div>
     </div>
     <div class="center_view" style="clear: both; padding-top: 2%; padding-bottom: 2%">
-      <button type="button" class="btn btn-info" id="feedback_submit" onclick="sendRelevanceFeedback()">
-        Click to start feedback mode
-      </button>
+
     </div>
   </div>
 </body>

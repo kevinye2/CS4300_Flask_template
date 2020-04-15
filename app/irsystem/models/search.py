@@ -32,28 +32,30 @@ def legalTipResp(query, county):
     ###Follow the template; replace this code###
     resp_object = {}
     temp = []
-    for i in range(3):
+    for i in range(30):
         temp.append(('NYS Law ' + str(i), 'law ' + str(i), 'code_' + str(i*i), 'https://legislation.nysenate.gov/static/docs/html/index.html#'))
     resp_object['legal_codes'] = temp
     temp = []
-    for i in range(3):
+    for i in range(1000):
         temp.append(('Ithaca case ' + str(i), 'case ' + str(i), 'case_' + str(i*i), 'https://case.law/'))
     resp_object['legal_cases'] = temp
     temp = []
-    for i in range(3):
+    for i in range(20):
         temp.append(('Reddit ' + str(i), 'r/Cornell ' + str(i), 'reddit_' + str(i*i), 'https://reddit.com'))
     resp_object['reddit_posts'] = temp
     ###Follow the template; replace this code###
     return resp_object
 
-def feedbackRatings(query, county, relevant_doc_ids):
+def feedbackRatings(query, county, relevant_doc_id):
     '''
     parameters:
         query: original string query
         county: original county selection
-        relevant_doc_ids: list of [doc_id, ranking] deeemed relevant to query and county;
+        relevant_doc_id: a [doc_id, ranking] 2 element list (basically a tuple)
+        deeemed relevant to query and county;
         ranking is the original ranking provided by the system for the
-        document in regards to its category (statutes, cases, reddit posts)
+        document in regards to its category (statutes, cases, reddit posts) and
+        is an integer 1...n
     '''
     ###Perform analysis on the relevancy rating###
-    return {'Great' : True}
+    return {'Great 1' : relevant_doc_id[0], 'Great 2' : relevant_doc_id[1]}

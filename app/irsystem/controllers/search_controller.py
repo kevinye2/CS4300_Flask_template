@@ -19,7 +19,7 @@ def handleQuery():
 def handleFeedback():
 	query = request.json.get('query')
 	county = request.json.get('county')
-	relevant_doc_ids = request.json.get('relevant_ratings')
-	resp_obj = feedbackRatings(query, county, relevant_doc_ids)
+	relevant_doc_id = request.json.get('relevant_rating')
+	resp_obj = feedbackRatings(query, county, relevant_doc_id)
 	return Response(response=json.dumps(resp_obj), status=200,
 		content_type='application/json')

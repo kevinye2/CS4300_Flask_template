@@ -13,7 +13,7 @@ div.left_org {
   width: 33.33333%;
   padding-left: 1%;
   padding-right: 1%;
-  text-align: center
+  text-align: center;
 }
 
 div.middle_org {
@@ -35,7 +35,7 @@ div.right_org {
 }
 
 div.fixed_container {
-  padding-top: 20px;
+  padding-top: 40px;
   height: 150px;
   overflow: hidden;
 }
@@ -56,16 +56,24 @@ div.fixed_container {
 }
 
 .link_no_runon {
-  display: block;
+  display: inline-block;
   padding-right: 50px;
-  font-size: 20px;
+  font-size: 15px;
   overflow-wrap: anywhere;
+  vertical-align: middle;
 }
 
 .no_runon {
   display: block;
   padding-right: 50px;
   overflow-wrap: anywhere;
+}
+
+.cont_bottom {
+  position: relative;
+  bottom: 0;
+  padding-top: 3px;
+  padding-bottom: 3px;
 }
 
 .btn {

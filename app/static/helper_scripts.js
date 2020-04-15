@@ -1,7 +1,11 @@
-var checkBoxStatus = {}
 var query;
 var county;
-var feedback_mode = false;
+var results_per_page = 3;
+var codes = {};
+var cases = {};
+var reddit = {};
+var feedbacks_sent = {};
+var feedbacks_failed = {};
 
 function getLegalTips() {
   query = document.getElementById("query_input").value;
@@ -27,119 +31,142 @@ function getLegalTips() {
     if (this.readyState == XMLHttpRequest.DONE && this.status === 200) {
       json_resp = JSON.parse(this.response);
       innerHTMLHandler(json_resp);
-      document.getElementById("query_submit").innerHTML = "Search"
+      document.getElementById("query_submit").innerHTML = "Search";
     }
   }
-  document.getElementById("results_area").setAttribute("style", "visibility: hidden")
+  document.getElementById("results_area").setAttribute("style", "visibility: hidden");
   requester.send(JSON.stringify(request_json_obj));
-  document.getElementById("query_submit").innerHTML = "Retrieving..."
+  document.getElementById("query_submit").innerHTML = "Retrieving...";
 }
 
-function sendRelevanceFeedback() {
-  if (!feedback_mode) {
-    feedback_mode = true
-    document.getElementById("feedback_submit").innerHTML = "Send feedback for relevant results"
-    showAllCheckBoxes();
-    return
+function sendRelevanceFeedback(elem) {
+  if (elem.id in feedbacks_sent) {
+    alert("Feedback already sent");
+    return;
   }
   var requester = new XMLHttpRequest();
   requester.open("POST", '/postfeedback', true);
   requester.setRequestHeader("Content-Type", "application/json");
   requester.onreadystatechange = function() {
     if (this.readyState == XMLHttpRequest.DONE && this.status === 200) {
-      document.getElementById("feedback_submit").innerHTML = "Send feedback for relevant results";
-    }
-  }
-  var temp_list = [];
-  for (var k in checkBoxStatus) {
-    if (checkBoxStatus[k][0]) {
-      temp_list.push([k, checkBoxStatus[k][1]]);
+      feedbacks_sent[elem.id] = true;
+      feedbacks_failed[elem.id] = false;
+      document.getElementById(elem.id).innerHTML = "Feedback sent!";
+    } else{
+      feedbacks_failed[elem.id] = true;
+      document.getElementById(elem.id).innerHTML = "Could not send, try again";
     }
   }
   var request_json_obj = {
     query: query,
     county: county,
-    relevant_ratings: temp_list
+    relevant_rating: [elem.id, parseInt(elem.dataset.rank)]
   };
-  document.getElementById("feedback_submit").innerHTML = "Sending feedback...";
+  document.getElementById(elem.id).innerHTML = "Sending...";
   requester.send(JSON.stringify(request_json_obj));
 }
 
 function innerHTMLHandler(json_resp) {
-  clearInnerHTMLAndVariables();
-  var codes = json_resp.legal_codes;
-  var cases = json_resp.legal_cases;
-  var reddit = json_resp.reddit_posts;
+  clearResultsAndVariables();
+  codes = json_resp.legal_codes;
+  cases = json_resp.legal_cases;
+  reddit = json_resp.reddit_posts;
   var codes_elem = document.getElementById("codes_info");
   var cases_elem = document.getElementById("cases_info");
   var reddit_elem = document.getElementById("reddit_info");
-  for (var i = 0; i < codes.length; i++) {
-    checkBoxStatus[codes[i][2]] = [false, i + 1];
-    codes_elem.insertAdjacentHTML("beforeend",
-      '<div class="fixed_container"><input type="checkbox"' +
-      'onchange="handleCheck(this)"' + 'id="' + codes[i][2] + '" ' +
-      'style="bottom: .42em; visibility: hidden" /><a target="_blank" href="' +
-      codes[i][3] + '">' + '<span class="link_no_runon">' +
-      codes[i][0].replace(new RegExp("\n", "g"), "<br>") + '</span>' +
-      '</a><span class="no_runon">' +
-      codes[i][1].replace(new RegExp("\n", "g"), "<br>") + '</span><br></div>'
-    );
+  var codes_page_elem = document.getElementById("codes_info_page_select");
+  var cases_page_elem = document.getElementById("cases_info_page_select");
+  var reddit_page_elem = document.getElementById("reddit_info_page_select");
+  var codes_total_pages = Math.ceil(codes.length / results_per_page);
+  var cases_total_pages = Math.ceil(cases.length / results_per_page);
+  var reddit_total_pages = Math.ceil(reddit.length / results_per_page);
+  for (var i = 0; i < codes_total_pages; i++) {
+    createIndividualPageOption(codes_page_elem, i + 1);
   }
-  for (var i = 0; i < cases.length; i++) {
-    checkBoxStatus[cases[i][2]] = [false, i + 1];
-    cases_elem.insertAdjacentHTML("beforeend",
-      '<div class="fixed_container"><input type="checkbox"' +
-      'onchange="handleCheck(this)"' + 'id="' + cases[i][2] + '" ' +
-      'style="bottom: .42em; visibility: hidden" /><a target="_blank" href="' +
-      cases[i][3] + '">' + '<span class="link_no_runon">' +
-      cases[i][0].replace(new RegExp("\n", "g"), "<br>") + '</span>' +
-      '</a><span class="no_runon">' +
-      cases[i][1].replace(new RegExp("\n", "g"), "<br>") + '</span><br></div>'
-    );
+  for (var i = 0; i < cases_total_pages; i++) {
+    createIndividualPageOption(cases_page_elem, i + 1);
   }
-  for (var i = 0; i < reddit.length; i++) {
-    checkBoxStatus[reddit[i][2]] = [false, i + 1];
-    reddit_elem.insertAdjacentHTML("beforeend",
-      '<div class="fixed_container"><input type="checkbox"' +
-      'onchange="handleCheck(this)"' + 'id="' + reddit[i][2] + '" ' +
-      'style="bottom: .42em; visibility: hidden" /><a target="_blank" href="' +
-      reddit[i][3] + '">' + '<span class="link_no_runon">' +
-      reddit[i][0].replace(new RegExp("\n", "g"), "<br>") + '</span>' +
-      '</a><span class="no_runon">' +
-      reddit[i][1].replace(new RegExp("\n", "g"), "<br>") + '</span><br></div>'
-    );
+  for (var i = 0; i < reddit_total_pages; i++) {
+    createIndividualPageOption(reddit_page_elem, i + 1);
+  }
+  for (var i = 0; i < Math.min(codes.length, results_per_page); i++) {
+    createIndividualResult(codes_elem, codes[i][2], codes[i][3],
+      codes[i][0], codes[i][1], i + 1);
+  }
+  for (var i = 0; i < Math.min(cases.length, results_per_page); i++) {
+    createIndividualResult(cases_elem, cases[i][2], cases[i][3],
+      cases[i][0], cases[i][1], i + 1);
+  }
+  for (var i = 0; i < Math.min(reddit.length, results_per_page); i++) {
+    createIndividualResult(reddit_elem, reddit[i][2], reddit[i][3],
+      reddit[i][0], reddit[i][1], i + 1);
   }
   document.getElementById("results_area").setAttribute("style", "visibility: visible");
 }
 
-function clearInnerHTMLAndVariables() {
-  checkBoxStatus = {}
-  feedback_mode = false
-  document.getElementById("feedback_submit").innerHTML = "Click to start feedback mode"
-  var temp = document.getElementById("codes_info");
-  while (temp.firstChild) {
-    temp.removeChild(temp.firstChild);
-  }
-  temp = document.getElementById("cases_info");
-  while (temp.firstChild) {
-    temp.removeChild(temp.firstChild);
-  }
-  temp = document.getElementById("reddit_info");
+function clearResultsAndVariables() {
+  feedbacks_sent = {};
+  feedbacks_failed = {};
+  clearHTMLElement("codes_info");
+  clearHTMLElement("cases_info");
+  clearHTMLElement("reddit_info");
+  clearHTMLElement("codes_info_page_select");
+  clearHTMLElement("cases_info_page_select");
+  clearHTMLElement("reddit_info_page_select");
+}
+
+function clearHTMLElement(id) {
+  temp = document.getElementById(id);
   while (temp.firstChild) {
     temp.removeChild(temp.firstChild);
   }
 }
 
-function handleCheck(cb) {
-  if (cb.checked) {
-    checkBoxStatus[cb.id] = [true, checkBoxStatus[cb.id][1]]
-  } else {
-    checkBoxStatus[cb.id] = [false, checkBoxStatus[cb.id][1]]
+function createIndividualResult(html_elem, id, link, title, content, rank) {
+  var msg = "Relevant";
+  if (id in feedbacks_sent) {
+    msg = "Feedback sent!";
+  }
+  if (id in feedbacks_failed && feedbacks_failed[id]) {
+    msg = "Could not send, try again"
+  }
+  html_elem.insertAdjacentHTML("beforeend",
+    '<div class="fixed_container"><span class="link_no_runon">' +
+    '<a target="_blank" href="' + link + '">' +
+    title.replace(new RegExp("\n", "g"), "<br>") +
+    '</a></span><span class="no_runon">' +
+    content.replace(new RegExp("\n", "g"), "<br>") + '</span><br>' +
+    '<button class="btn btn-info" id=' + id +
+    ' onclick="sendRelevanceFeedback(this)" data-rank=' + rank.toString() +
+    ' style="font-size: 11px">' + msg + '</button></div>'
+  );
+}
+
+function createIndividualPageOption(html_elem, val) {
+  var selected = '';
+  if (val == 1) {
+    selected = ' selected="selected"'
+  }
+  var to_insert = '<option' + selected + ' value=' + val + '>Page ' + val + '</option>';
+  html_elem.insertAdjacentHTML("beforeend", to_insert);
+}
+
+function pageChange(html_elem, id, data, new_page) {
+  clearHTMLElement(id);
+  for (i = (new_page - 1) * results_per_page; i < Math.min(new_page * results_per_page, data.length); i++) {
+    createIndividualResult(html_elem, data[i][2], data[i][3],
+      data[i][0], data[i][1], i + 1);
   }
 }
 
-function showAllCheckBoxes() {
-  for (k in checkBoxStatus) {
-    document.getElementById(k).setAttribute('style', 'bottom: .42em; visibility: visible');
+function handlePageSelect(sel) {
+  if (sel.id == "codes_info_page_select") {
+    pageChange(document.getElementById("codes_info"), "codes_info", codes, sel.value);
+  }
+  if (sel.id == "cases_info_page_select") {
+    pageChange(document.getElementById("cases_info"), "cases_info", cases, sel.value);
+  }
+  if (sel.id == "reddit_info_page_select") {
+    pageChange(document.getElementById("reddit_info"), "reddit_info", reddit, sel.value);
   }
 }
