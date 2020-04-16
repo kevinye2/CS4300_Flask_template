@@ -1,6 +1,6 @@
 var query;
 var county;
-var results_per_page = 3;
+var results_per_page = 5;
 var codes = {};
 var cases = {};
 var reddit = {};
@@ -40,6 +40,7 @@ function getLegalTips() {
 }
 
 function sendRelevanceFeedback(elem) {
+  handleEllipsis("codes_info");
   if (elem.id in feedbacks_sent) {
     alert("Feedback already sent");
     return;
@@ -52,7 +53,7 @@ function sendRelevanceFeedback(elem) {
       feedbacks_sent[elem.id] = true;
       feedbacks_failed[elem.id] = false;
       document.getElementById(elem.id).innerHTML = "Feedback sent!";
-    } else{
+    } else {
       feedbacks_failed[elem.id] = true;
       document.getElementById(elem.id).innerHTML = "Could not send, try again";
     }
@@ -133,9 +134,9 @@ function createIndividualResult(html_elem, id, link, title, content, rank) {
   html_elem.insertAdjacentHTML("beforeend",
     '<div class="fixed_container"><span class="link_no_runon">' +
     '<a target="_blank" href="' + link + '">' +
-    title.replace(new RegExp("\n", "g"), "<br>") +
+    title.replace(new RegExp("\n", "g"), "<br>").replace(new RegExp("\t", "g"), "&nbsp&nbsp&nbsp&nbsp") +
     '</a></span><span class="no_runon">' +
-    content.replace(new RegExp("\n", "g"), "<br>") + '</span><br>' +
+    content.replace(new RegExp("\n", "g"), "<br>").replace(new RegExp("\t", "g"), "&nbsp&nbsp&nbsp&nbsp") + '</span><br>' +
     '<button class="btn btn-info" id=' + id +
     ' onclick="sendRelevanceFeedback(this)" data-rank=' + rank.toString() +
     ' style="font-size: 11px">' + msg + '</button></div>'
@@ -169,4 +170,51 @@ function handlePageSelect(sel) {
   if (sel.id == "reddit_info_page_select") {
     pageChange(document.getElementById("reddit_info"), "reddit_info", reddit, sel.value);
   }
+}
+
+function handleEllipsis(id) {
+  $("#" + id).find("div").each(function() {
+    $(this).find("span").each(function() {
+      var cur_span = $(this);
+      var max_height = parseFloat(cur_span.css("max-height"));
+      var cur_a;
+      if (cur_span.find("a").length > 0) {
+        console.log(cur_span.outerHeight(), max_height)
+        var cur_a = $(cur_span.find("a").get(0));
+        if (cur_span.outerHeight() >= max_height) {
+          var temp = ""
+          var all_html = cur_a.html().split(" ");
+          cur_a.html("");
+          var i = 0;
+          while (cur_span.outerHeight() < max_height && i < all_html.length) {
+            temp += all_html[i] + " ";
+            i++;
+            cur_a.html(temp);
+          }
+          if (i > 2) {
+            temp = temp.substring(0, Math.max(0, temp.length - all_html[i - 1].length - 5)) + " ...";
+          }
+          cur_a.html(temp);
+        }
+      } else {
+        console.log(cur_span.outerHeight(), max_height)
+        if (cur_span.outerHeight() >= max_height) {
+          var temp = ""
+          var all_html = cur_span.html().split(" ");
+
+          cur_span.html("");
+          var i = 0;
+          while (cur_span.outerHeight() < max_height && i < all_html.length) {
+            temp += all_html[i] + " ";
+            i++;
+            cur_span.html(temp);
+          }
+          if (i > 2) {
+            temp = temp.substring(0, Math.max(0, temp.length - all_html[i - 1].length - 5)) + " ...";
+          }
+          cur_span.html(temp);
+        }
+      }
+    });
+  });
 }

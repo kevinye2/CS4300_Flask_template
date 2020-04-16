@@ -1,5 +1,8 @@
-body {
-  padding-top: 15%;
+div.ultimate_div {
+  padding-top: 5%;
+  margin-left: auto;
+  margin-right: auto;
+  width: 1920px;
 }
 
 div.center_view {
@@ -35,8 +38,7 @@ div.right_org {
 }
 
 div.fixed_container {
-  padding-top: 40px;
-  height: 150px;
+  padding-bottom: 4.5em;
   overflow: hidden;
 }
 
@@ -58,15 +60,20 @@ div.fixed_container {
 .link_no_runon {
   display: inline-block;
   padding-right: 50px;
-  font-size: 15px;
   overflow-wrap: anywhere;
-  vertical-align: middle;
+  font-size: 1.5em;
+  line-height: 1em;
+  max-height: 12em;
+  overflow: inherit;
 }
 
 .no_runon {
   display: block;
   padding-right: 50px;
   overflow-wrap: anywhere;
+  line-height: 1.5em;
+  max-height: 12em;
+  overflow: inherit;
 }
 
 .cont_bottom {
