@@ -40,7 +40,6 @@ function getLegalTips() {
 }
 
 function sendRelevanceFeedback(elem) {
-  handleEllipsis("codes_info");
   if (elem.id in feedbacks_sent) {
     alert("Feedback already sent");
     return;
@@ -102,6 +101,9 @@ function innerHTMLHandler(json_resp) {
     createIndividualResult(reddit_elem, reddit[i][2], reddit[i][3],
       reddit[i][0], reddit[i][1], i + 1);
   }
+  handleEllipsis("codes_info");
+  handleEllipsis("cases_info");
+  handleEllipsis("reddit_info");
   document.getElementById("results_area").setAttribute("style", "visibility: visible");
 }
 
@@ -161,15 +163,20 @@ function pageChange(html_elem, id, data, new_page) {
 }
 
 function handlePageSelect(sel) {
+  document.getElementById("results_area").setAttribute("style", "visibility: hidden");
   if (sel.id == "codes_info_page_select") {
     pageChange(document.getElementById("codes_info"), "codes_info", codes, sel.value);
+    handleEllipsis("codes_info");
   }
   if (sel.id == "cases_info_page_select") {
     pageChange(document.getElementById("cases_info"), "cases_info", cases, sel.value);
+    handleEllipsis("cases_info");
   }
   if (sel.id == "reddit_info_page_select") {
     pageChange(document.getElementById("reddit_info"), "reddit_info", reddit, sel.value);
+    handleEllipsis("reddit_info");
   }
+  document.getElementById("results_area").setAttribute("style", "visibility: visible");
 }
 
 function handleEllipsis(id) {
@@ -179,7 +186,6 @@ function handleEllipsis(id) {
       var max_height = parseFloat(cur_span.css("max-height"));
       var cur_a;
       if (cur_span.find("a").length > 0) {
-        console.log(cur_span.outerHeight(), max_height)
         var cur_a = $(cur_span.find("a").get(0));
         if (cur_span.outerHeight() >= max_height) {
           var temp = ""
@@ -197,7 +203,6 @@ function handleEllipsis(id) {
           cur_a.html(temp);
         }
       } else {
-        console.log(cur_span.outerHeight(), max_height)
         if (cur_span.outerHeight() >= max_height) {
           var temp = ""
           var all_html = cur_span.html().split(" ");
