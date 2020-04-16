@@ -1,7 +1,7 @@
 div.ultimate_div {
   padding-top: 5%;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0 auto;
+  overflow-x: hidden;
 }
 
 div.center_view {
@@ -13,6 +13,7 @@ div.center_view {
 div.left_org {
   float: left;
   width: 33.33333%;
+  width: calc(100% / 3);
   padding-left: 1%;
   padding-right: 1%;
   text-align: center;
@@ -20,17 +21,19 @@ div.left_org {
 
 div.middle_org {
   width: 33.33333%;
+  width: calc(100% / 3);
   padding-left: 1%;
   padding-right: 1%;
   display: inline-block;
   text-align: center;
-  border-left: 2px solid rgba(0, 0, 0, .5);
-  border-right: 2px solid rgba(0, 0, 0, .5);
+  border-left: 2px solid rgba(0, 0, 0, 0);
+  border-right: 2px solid rgba(0, 0, 0, 0);
 }
 
 div.right_org {
   float: right;
   width: 33.333333%;
+  width: calc(100% / 3);
   padding-left: 1%;
   padding-right: 1%;
   text-align: center;
@@ -63,7 +66,7 @@ div.fixed_container {
   font-size: 1.5em;
   line-height: 1em;
   max-height: 12em;
-  overflow: inherit;
+  overflow: visible;
 }
 
 .no_runon {
@@ -72,7 +75,7 @@ div.fixed_container {
   overflow-wrap: anywhere;
   line-height: 1.5em;
   max-height: 12em;
-  overflow: inherit;
+  overflow: visible;
 }
 
 .cont_bottom {

@@ -6,6 +6,11 @@ var cases = {};
 var reddit = {};
 var feedbacks_sent = {};
 var feedbacks_failed = {};
+var cur_pages = {
+  "codes_info": 1,
+  "cases_info": 1,
+  "reddit_info": 1
+};
 
 function getLegalTips() {
   query = document.getElementById("query_input").value;
@@ -101,13 +106,18 @@ function innerHTMLHandler(json_resp) {
     createIndividualResult(reddit_elem, reddit[i][2], reddit[i][3],
       reddit[i][0], reddit[i][1], i + 1);
   }
-  handleEllipsis("codes_info");
-  handleEllipsis("cases_info");
-  handleEllipsis("reddit_info");
+  addCleanText("codes_info", codes.length);
+  addCleanText("cases_info", cases.length);
+  addCleanText("reddit_info", reddit.length);
   document.getElementById("results_area").setAttribute("style", "visibility: visible");
 }
 
 function clearResultsAndVariables() {
+  cur_pages = {
+    "codes_info": 1,
+    "cases_info": 1,
+    "reddit_info": 1
+  };
   feedbacks_sent = {};
   feedbacks_failed = {};
   clearHTMLElement("codes_info");
@@ -136,9 +146,7 @@ function createIndividualResult(html_elem, id, link, title, content, rank) {
   html_elem.insertAdjacentHTML("beforeend",
     '<div class="fixed_container"><span class="link_no_runon">' +
     '<a target="_blank" href="' + link + '">' +
-    title.replace(new RegExp("\n", "g"), "<br>").replace(new RegExp("\t", "g"), "&nbsp&nbsp&nbsp&nbsp") +
-    '</a></span><span class="no_runon">' +
-    content.replace(new RegExp("\n", "g"), "<br>").replace(new RegExp("\t", "g"), "&nbsp&nbsp&nbsp&nbsp") + '</span><br>' +
+    '</a></span><span class="no_runon"></span><br>' +
     '<button class="btn btn-info" id=' + id +
     ' onclick="sendRelevanceFeedback(this)" data-rank=' + rank.toString() +
     ' style="font-size: 11px">' + msg + '</button></div>'
@@ -155,71 +163,84 @@ function createIndividualPageOption(html_elem, val) {
 }
 
 function pageChange(html_elem, id, data, new_page) {
+  cur_pages[id] = new_page;
   clearHTMLElement(id);
   for (i = (new_page - 1) * results_per_page; i < Math.min(new_page * results_per_page, data.length); i++) {
     createIndividualResult(html_elem, data[i][2], data[i][3],
       data[i][0], data[i][1], i + 1);
   }
+  addCleanText(id, data.length);
 }
 
 function handlePageSelect(sel) {
   document.getElementById("results_area").setAttribute("style", "visibility: hidden");
   if (sel.id == "codes_info_page_select") {
     pageChange(document.getElementById("codes_info"), "codes_info", codes, sel.value);
-    handleEllipsis("codes_info");
   }
   if (sel.id == "cases_info_page_select") {
     pageChange(document.getElementById("cases_info"), "cases_info", cases, sel.value);
-    handleEllipsis("cases_info");
   }
   if (sel.id == "reddit_info_page_select") {
     pageChange(document.getElementById("reddit_info"), "reddit_info", reddit, sel.value);
-    handleEllipsis("reddit_info");
   }
   document.getElementById("results_area").setAttribute("style", "visibility: visible");
 }
 
-function handleEllipsis(id) {
+function addCleanText(id, max_length) {
+  var cur_page = cur_pages[id];
+  var index_holder = [];
+  for (i = (cur_page - 1) * results_per_page; i < Math.min(cur_page * results_per_page, max_length); i++) {
+    index_holder.push(i);
+  }
+  if (id == "codes_info") {
+    handleEllipsis(id, index_holder, codes);
+  } else if (id == "cases_info") {
+    handleEllipsis(id, index_holder, cases);
+  } else if (id == "reddit_info") {
+    handleEllipsis(id, index_holder, reddit);
+  }
+}
+
+function handleEllipsis(id, idxs, info_holder) {
+  var pos = 0;
   $("#" + id).find("div").each(function() {
     $(this).find("span").each(function() {
+      if (pos >= idxs.length) {
+        return;
+      }
+      var cur_idx = idxs[pos];
+      var clean_title = $("<div>" + info_holder[cur_idx][0] + "</div>").text()
+        .replace(new RegExp("\n", "g"), "<br>")
+        .replace(new RegExp("\t", "g"), "&nbsp&nbsp&nbsp&nbsp");
+      var clean_content = $("<div>" + info_holder[cur_idx][1] + "</div>").text()
+        .replace(new RegExp("\n", "g"), "<br>")
+        .replace(new RegExp("\t", "g"), "&nbsp&nbsp&nbsp&nbsp");
       var cur_span = $(this);
       var max_height = parseFloat(cur_span.css("max-height"));
       var cur_a;
       if (cur_span.find("a").length > 0) {
         var cur_a = $(cur_span.find("a").get(0));
-        if (cur_span.outerHeight() >= max_height) {
-          var temp = ""
-          var all_html = cur_a.html().split(" ");
-          cur_a.html("");
-          var i = 0;
-          while (cur_span.outerHeight() < max_height && i < all_html.length) {
-            temp += all_html[i] + " ";
-            i++;
-            cur_a.html(temp);
-          }
-          if (i > 2) {
-            temp = temp.substring(0, Math.max(0, temp.length - all_html[i - 1].length - 5)) + " ...";
-          }
-          cur_a.html(temp);
-        }
+        cleaveText(cur_span, cur_a, max_height, clean_title);
       } else {
-        if (cur_span.outerHeight() >= max_height) {
-          var temp = ""
-          var all_html = cur_span.html().split(" ");
-
-          cur_span.html("");
-          var i = 0;
-          while (cur_span.outerHeight() < max_height && i < all_html.length) {
-            temp += all_html[i] + " ";
-            i++;
-            cur_span.html(temp);
-          }
-          if (i > 2) {
-            temp = temp.substring(0, Math.max(0, temp.length - all_html[i - 1].length - 5)) + " ...";
-          }
-          cur_span.html(temp);
-        }
+        cleaveText(cur_span, cur_span, max_height, clean_content);
       }
     });
+    pos++;
   });
+}
+
+function cleaveText(outer_wrap, inner_wrap, max_height, words) {
+  var temp = ""
+  var all_html = words.split(" ");
+  inner_wrap.html("");
+  var i = 0;
+  while (outer_wrap.outerHeight() < max_height && i < all_html.length) {
+    temp += all_html[i] + " ";
+    i++;
+    inner_wrap.html(temp);
+  }
+  if (i > 2 && outer_wrap.outerHeight() >= max_height) {
+    temp = temp.substring(0, Math.max(0, temp.length - all_html[i - 1].length - 1)) + " ...";
+  }
+  inner_wrap.html(temp);
 }
