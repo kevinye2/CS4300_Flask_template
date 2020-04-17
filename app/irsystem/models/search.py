@@ -2,6 +2,27 @@ from . import *
 from app.irsystem.models.helpers import *
 import random
 import string
+import requests
+
+def getCases(query, county):
+    '''
+    parameters:
+        query: string describing user legal help request for COVID-19
+        county: string describing which county the user is in
+    returns:
+        list of tuples in the form of
+            [
+                ('Statute title', 'description', id, url),
+                ...
+            ],
+    '''
+    ###does not filter by county yet###
+    r = requests.get('https://api.case.law/v1/cases/?search='+ query + '&jurisdiction=ny&full_case=true&body_format=html')
+    data = r.json()
+    all_cases = []
+    for case in data['results']:
+        all_cases.append((case['name'], case['preview'], case['id'], case['frontend_url']))
+    return all_cases
 
 def legalTipResp(query, county):
     '''
@@ -51,23 +72,25 @@ def legalTipResp(query, county):
             'code_' + str(i*i),
             'https://legislation.nysenate.gov/static/docs/html/index.html#'))
     resp_object['legal_codes'] = temp
-    temp = []
-    for i in range(94):
-        temp_title = ''
-        temp_content = ''
-        for j in range(100):
-            for k in range(random.choice(range(1, 21))):
-                if j < 20:
-                    temp_title += random.choice(total_string)
-                temp_content += random.choice(total_string)
-            temp_title += ' '
-            temp_content += ' '
-        temp.append((
-            str(i) + temp_title + str(i),
-            str(i) + temp_content + str(i),
-            'case_' + str(i*i),
-            'https://case.law/'))
-    resp_object['legal_cases'] = temp
+    # temp = []
+    # for i in range(94):
+    #     temp_title = ''
+    #     temp_content = ''
+    #     for j in range(100):
+    #         for k in range(random.choice(range(1, 21))):
+    #             if j < 20:
+    #                 temp_title += random.choice(total_string)
+    #             temp_content += random.choice(total_string)
+    #         temp_title += ' '
+    #         temp_content += ' '
+    #     temp.append((
+    #         str(i) + temp_title + str(i),
+    #         str(i) + temp_content + str(i),
+    #         'case_' + str(i*i),
+    #         'https://case.law/'))
+    # resp_object['legal_cases'] = temp
+    ###getting Caselaw data from API using helper function getCases()###
+    resp_object['legal_cases'] = getCases(query, county)
     temp = []
     for i in range(93):
         temp_title = ''
