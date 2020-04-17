@@ -21,7 +21,8 @@ def getCases(query, county):
     data = r.json()
     all_cases = []
     for case in data['results']:
-        all_cases.append((case['name'], case['preview'], case['id'], case['frontend_url']))
+        preview = '\n'.join(case['preview'])
+        all_cases.append((case['name'], preview, case['id'], case['frontend_url']))
     return all_cases
 
 def legalTipResp(query, county):
