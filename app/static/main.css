@@ -1,21 +1,34 @@
+/*
+  ultimate_div is a protective container that prevents contents inside
+  from being shifted upon window resize events
+*/
 div.ultimate_div {
   margin: 0 auto;
   padding: 0;
   overflow-x: hidden;
 }
 
+/*
+  Puts div in the center of its parent container
+*/
 div.center_view {
   width: 50%;
   margin: 0 auto;
   text-align: center;
 }
 
+/*
+  Container for page navigation
+*/
 div.page_click_area {
   width: 100%;
   margin: 0 auto;
   text-align: center;
 }
 
+/*
+  Container for results
+*/
 div.middle_org {
   width: 75%;
   margin: 0 auto;
@@ -24,26 +37,48 @@ div.middle_org {
   text-align: center;
 }
 
+/*
+  Container for legal, case, or reddit information
+*/
 div.fixed_container {
   padding-bottom: 4.5em;
   overflow: hidden;
 }
 
+/*
+  Adds a bit of bottom padding
+*/
+div.bottom_padding {
+  padding-bottom: 5em;
+}
+
+/*
+  Sets dimensions and increases margins at top and bottom
+*/
 .increase_margins {
   margin-bottom: 10px;
   margin-top: 10px;
   width: 40%;
 }
 
+/*
+  Increase padding a bit on top and bottom
+*/
 .increase_padding {
   padding-top: 3px;
   padding-bottom: 3px;
 }
 
+/*
+  Shifts all inner text left
+*/
 .left_shift_text {
   text-align: left;
 }
 
+/*
+  Specially formatted container limiting extent of text display
+*/
 .link_no_runon {
   display: inline-block;
   padding-right: 50px;
@@ -51,18 +86,24 @@ div.fixed_container {
   font-size: 1.5em;
   line-height: 1em;
   max-height: 12em;
-  overflow: hidden;
+  overflow: visible;
 }
 
+/*
+  Similar functionality to .link_no_runon
+*/
 .no_runon {
   display: block;
   padding-right: 50px;
   overflow-wrap: anywhere;
   line-height: 1.5em;
   max-height: 12em;
-  overflow: hidden;
+  overflow: visible;
 }
 
+/*
+  Element forced to bottom of its container
+*/
 .cont_bottom {
   position: relative;
   bottom: 0;
