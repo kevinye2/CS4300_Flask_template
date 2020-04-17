@@ -1,16 +1,29 @@
 var query;
 var county;
 var results_per_page = 5;
+var max_page_options = 10;
 var codes = {};
 var cases = {};
 var reddit = {};
 var feedbacks_sent = {};
 var feedbacks_failed = {};
+var chosen_category = '';
+var total_pages = {
+  "codes_info": 1,
+  "cases_info": 1,
+  "reddit_info": 1
+};
 var cur_pages = {
   "codes_info": 1,
   "cases_info": 1,
   "reddit_info": 1
 };
+var populate_status = {
+  "codes_info": false,
+  "cases_info": false,
+  "reddit_info": false
+}
+var results_ready = false;
 
 function getLegalTips() {
   query = document.getElementById("query_input").value;
@@ -24,6 +37,9 @@ function getLegalTips() {
     return;
   } else if (county == "") {
     alert("Please input a valid county");
+    return;
+  } else if (chosen_category == "") {
+    alert("Please select a category");
     return;
   }
   request_json_obj = {
@@ -42,6 +58,7 @@ function getLegalTips() {
   document.getElementById("results_area").setAttribute("style", "visibility: hidden");
   requester.send(JSON.stringify(request_json_obj));
   document.getElementById("query_submit").innerHTML = "Retrieving...";
+  results_ready = false;
 }
 
 function sendRelevanceFeedback(elem) {
@@ -71,6 +88,31 @@ function sendRelevanceFeedback(elem) {
   requester.send(JSON.stringify(request_json_obj));
 }
 
+function setCategory(elem) {
+  $("#choose_codes").attr("style", "background-color: #999");
+  $("#choose_cases").attr("style", "background-color: #999");
+  $("#choose_reddit").attr("style", "background-color: #999");
+  chosen_category = elem.dataset.category;
+  $("#" + elem.id).attr("style", "background-color: #38ca3f");
+  if (results_ready) {
+    showResults();
+    populateData();
+  }
+}
+
+function populateData() {
+  if (chosen_category == "codes_info_container" && !populate_status['codes_info']) {
+    populate_status['codes_info'] = true;
+    addCleanText("codes_info", codes.length);
+  } else if (chosen_category == "cases_info_container" && !populate_status['cases_info']) {
+    populate_status['cases_info'] = true;
+    addCleanText("cases_info", cases.length);
+  } else if (chosen_category == "reddit_info_container" && !populate_status['reddit_info']) {
+    populate_status['reddit_info'] = true;
+    addCleanText("reddit_info", reddit.length);
+  }
+}
+
 function innerHTMLHandler(json_resp) {
   clearResultsAndVariables();
   codes = json_resp.legal_codes;
@@ -79,21 +121,15 @@ function innerHTMLHandler(json_resp) {
   var codes_elem = document.getElementById("codes_info");
   var cases_elem = document.getElementById("cases_info");
   var reddit_elem = document.getElementById("reddit_info");
-  var codes_page_elem = document.getElementById("codes_info_page_select");
-  var cases_page_elem = document.getElementById("cases_info_page_select");
-  var reddit_page_elem = document.getElementById("reddit_info_page_select");
-  var codes_total_pages = Math.ceil(codes.length / results_per_page);
-  var cases_total_pages = Math.ceil(cases.length / results_per_page);
-  var reddit_total_pages = Math.ceil(reddit.length / results_per_page);
-  for (var i = 0; i < codes_total_pages; i++) {
-    createIndividualPageOption(codes_page_elem, i + 1);
-  }
-  for (var i = 0; i < cases_total_pages; i++) {
-    createIndividualPageOption(cases_page_elem, i + 1);
-  }
-  for (var i = 0; i < reddit_total_pages; i++) {
-    createIndividualPageOption(reddit_page_elem, i + 1);
-  }
+  var codes_page_click_elem = document.getElementById("codes_info_page_click");
+  var cases_page_click_elem = document.getElementById("cases_info_page_click");
+  var reddit_page_click_elem = document.getElementById("reddit_info_page_click");
+  total_pages["codes_info"] = Math.ceil(codes.length / results_per_page);
+  total_pages["cases_info"] = Math.ceil(cases.length / results_per_page);
+  total_pages["reddit_info"] = Math.ceil(reddit.length / results_per_page);
+  createPageClickRange(codes_page_click_elem, "codes_info", 1, total_pages["codes_info"]);
+  createPageClickRange(cases_page_click_elem, "cases_info", 1, total_pages["cases_info"]);
+  createPageClickRange(reddit_page_click_elem, "reddit_info", 1, total_pages["reddit_info"]);
   for (var i = 0; i < Math.min(codes.length, results_per_page); i++) {
     createIndividualResult(codes_elem, codes[i][2], codes[i][3],
       codes[i][0], codes[i][1], i + 1);
@@ -106,13 +142,25 @@ function innerHTMLHandler(json_resp) {
     createIndividualResult(reddit_elem, reddit[i][2], reddit[i][3],
       reddit[i][0], reddit[i][1], i + 1);
   }
-  addCleanText("codes_info", codes.length);
-  addCleanText("cases_info", cases.length);
-  addCleanText("reddit_info", reddit.length);
   document.getElementById("results_area").setAttribute("style", "visibility: visible");
+  results_ready = true;
+  showResults();
+  populateData();
+}
+
+function showResults() {
+  $("#codes_info_container").attr("style", "display: none");
+  $("#cases_info_container").attr("style", "display: none");
+  $("#reddit_info_container").attr("style", "display: none");
+  $("#" + chosen_category).attr("style", "display: block");
 }
 
 function clearResultsAndVariables() {
+  populate_status = {
+    "codes_info": false,
+    "cases_info": false,
+    "reddit_info": false
+  }
   cur_pages = {
     "codes_info": 1,
     "cases_info": 1,
@@ -123,9 +171,9 @@ function clearResultsAndVariables() {
   clearHTMLElement("codes_info");
   clearHTMLElement("cases_info");
   clearHTMLElement("reddit_info");
-  clearHTMLElement("codes_info_page_select");
-  clearHTMLElement("cases_info_page_select");
-  clearHTMLElement("reddit_info_page_select");
+  clearHTMLElement("codes_info_page_click");
+  clearHTMLElement("cases_info_page_click");
+  clearHTMLElement("reddit_info_page_click");
 }
 
 function clearHTMLElement(id) {
@@ -148,41 +196,72 @@ function createIndividualResult(html_elem, id, link, title, content, rank) {
     '<a target="_blank" href="' + link + '">' +
     '</a></span><span class="no_runon"></span><br>' +
     '<button class="btn btn-info" id=' + id +
-    ' onclick="sendRelevanceFeedback(this)" data-rank=' + rank.toString() +
-    ' style="font-size: 11px">' + msg + '</button></div>'
+    ' onclick="sendRelevanceFeedback(this)" data-rank="' + rank.toString() +
+    '" style="font-size: 11px">' + msg + '</button></div>'
   );
 }
 
-function createIndividualPageOption(html_elem, val) {
-  var selected = '';
-  if (val == 1) {
-    selected = ' selected="selected"'
+function createPageClickRange(html_elem, id, start_page, total_pages) {
+  if (cur_pages[id] > 1) {
+    html_elem.insertAdjacentHTML("beforeend",
+      '<a href="#" data-pagenum="previous" ' +
+      'data-infoclass="' + id +
+      '" onclick="handlePageClick(this)">previous</a>&nbsp&nbsp&nbsp&nbsp');
   }
-  var to_insert = '<option' + selected + ' value=' + val + '>Page ' + val + '</option>';
+  var to_insert = '';
+  for (i = start_page; i <= Math.min(total_pages, start_page + max_page_options - 1); i++) {
+    var styling = '';
+    if (i == cur_pages[id]) {
+      styling = 'style="font-weight: bold; text-decoration: underline" ';
+    }
+    to_insert += '<a ' + styling + 'href="#" data-pagenum="' + i.toString() +
+      '" data-infoclass="' + id + '" onclick="handlePageClick(this)">' +
+      i + '</a> ';
+  }
   html_elem.insertAdjacentHTML("beforeend", to_insert);
+  if (total_pages > start_page + max_page_options - 1) {
+    html_elem.insertAdjacentHTML("beforeend",
+      '&nbsp&nbsp&nbsp<a href="#" data-pagenum="next" ' +
+      'data-infoclass="' + id +
+      '" onclick="handlePageClick(this)">next</a>');
+  }
 }
 
 function pageChange(html_elem, id, data, new_page) {
-  cur_pages[id] = new_page;
+  if (new_page == "next") {
+    cur_pages[id] += 1;
+  } else if (new_page == "previous") {
+    cur_pages[id] -= 1;
+  } else {
+    cur_pages[id] = parseInt(new_page);
+  }
   clearHTMLElement(id);
-  for (i = (new_page - 1) * results_per_page; i < Math.min(new_page * results_per_page, data.length); i++) {
+  for (i = (cur_pages[id] - 1) * results_per_page; i < Math.min(cur_pages[id] * results_per_page, data.length); i++) {
     createIndividualResult(html_elem, data[i][2], data[i][3],
       data[i][0], data[i][1], i + 1);
   }
   addCleanText(id, data.length);
 }
 
-function handlePageSelect(sel) {
+function handlePageClick(sel) {
+  if (sel.dataset.pagenum == cur_pages[sel.dataset.infoclass]) {
+    return;
+  }
+  var data = {}
+  if (sel.dataset.infoclass == "codes_info") {
+    data = codes;
+  } else if (sel.dataset.infoclass == "cases_info") {
+    data = cases;
+  } else {
+    data = reddit;
+  }
   document.getElementById("results_area").setAttribute("style", "visibility: hidden");
-  if (sel.id == "codes_info_page_select") {
-    pageChange(document.getElementById("codes_info"), "codes_info", codes, sel.value);
-  }
-  if (sel.id == "cases_info_page_select") {
-    pageChange(document.getElementById("cases_info"), "cases_info", cases, sel.value);
-  }
-  if (sel.id == "reddit_info_page_select") {
-    pageChange(document.getElementById("reddit_info"), "reddit_info", reddit, sel.value);
-  }
+  clearHTMLElement(sel.dataset.infoclass + "_page_click");
+  pageChange(document.getElementById(sel.dataset.infoclass),
+    sel.dataset.infoclass, data, sel.dataset.pagenum);
+  var new_start = Math.max(1, cur_pages[sel.dataset.infoclass] - Math.floor(max_page_options / 2));
+  createPageClickRange(document.getElementById(sel.dataset.infoclass + "_page_click"),
+    sel.dataset.infoclass, new_start, total_pages[sel.dataset.infoclass]);
   document.getElementById("results_area").setAttribute("style", "visibility: visible");
 }
 
@@ -234,7 +313,7 @@ function cleaveText(outer_wrap, inner_wrap, max_height, words) {
   var all_html = words.split(" ");
   inner_wrap.html("");
   var i = 0;
-  while (outer_wrap.outerHeight() < max_height && i < all_html.length) {
+  while (outer_wrap.outerHeight() < (max_height - 1) && i < all_html.length) {
     temp += all_html[i] + " ";
     i++;
     inner_wrap.html(temp);

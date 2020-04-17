@@ -1,5 +1,7 @@
 from . import *
 from app.irsystem.models.helpers import *
+import random
+import string
 
 def legalTipResp(query, county):
     '''
@@ -32,16 +34,56 @@ def legalTipResp(query, county):
     ###Follow the template; replace this code###
     resp_object = {}
     temp = []
-    for i in range(30):
-        temp.append(('NYS Law ' + str(i), 'law ' + str(i), 'code_' + str(i*i), 'https://legislation.nysenate.gov/static/docs/html/index.html#'))
+    total_string = string.ascii_lowercase + string.ascii_uppercase + string.digits
+    for i in range(107):
+        temp_title = ''
+        temp_content = ''
+        for j in range(100):
+            for k in range(random.choice(range(1, 21))):
+                if j < 20:
+                    temp_title += random.choice(total_string)
+                temp_content += random.choice(total_string)
+            temp_title += ' '
+            temp_content += ' '
+        temp.append((
+            str(i) + temp_title + str(i),
+            str(i) + temp_content + str(i),
+            'code_' + str(i*i),
+            'https://legislation.nysenate.gov/static/docs/html/index.html#'))
     resp_object['legal_codes'] = temp
     temp = []
-    for i in range(1000):
-        temp.append(('Ithaca case ' + str(i), 'case ' + str(i), 'case_' + str(i*i), 'https://case.law/'))
+    for i in range(94):
+        temp_title = ''
+        temp_content = ''
+        for j in range(100):
+            for k in range(random.choice(range(1, 21))):
+                if j < 20:
+                    temp_title += random.choice(total_string)
+                temp_content += random.choice(total_string)
+            temp_title += ' '
+            temp_content += ' '
+        temp.append((
+            str(i) + temp_title + str(i),
+            str(i) + temp_content + str(i),
+            'case_' + str(i*i),
+            'https://case.law/'))
     resp_object['legal_cases'] = temp
     temp = []
-    for i in range(20):
-        temp.append(('Reddit ' + str(i), 'r/Cornell ' + str(i), 'reddit_' + str(i*i), 'https://reddit.com'))
+    for i in range(93):
+        temp_title = ''
+        temp_content = ''
+        for j in range(100):
+            for k in range(random.choice(range(1, 21))):
+                if j < 20:
+                    temp_title += random.choice(total_string)
+                temp_content += random.choice(total_string)
+            temp_title += ' '
+            temp_content += ' '
+        temp.append((
+            str(i) + temp_title + str(i),
+            str(i) + temp_content + str(i),
+            'reddit_' + str(i*i),
+            'https://reddit.com'))
     resp_object['reddit_posts'] = temp
     ###Follow the template; replace this code###
     return resp_object
