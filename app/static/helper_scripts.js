@@ -26,8 +26,12 @@ var populate_status = {
 var results_ready = false;
 
 function getLegalTips() {
-  query = document.getElementById("query_input").value;
-  county = document.getElementById("county_selection").value;
+  query = document.getElementById("query_input").value.trim().toLowerCase();
+  if (!query.match(/^[ 0-9a-z]+$/)) {
+    alert("Please ensure query is alphanumeric");
+    return;
+  }
+  county = document.getElementById("county_selection").value.toLowerCase();
   var requester = new XMLHttpRequest();
   if (county == "" || query == "") {
     alert("Please input a valid legal query and county");
@@ -299,16 +303,16 @@ function handleEllipsis(id, idxs, info_holder) {
       var cur_a;
       if (cur_span.find("a").length > 0) {
         var cur_a = $(cur_span.find("a").get(0));
-        cleaveText(cur_span, cur_a, max_height, clean_title);
+        cleaveText(cur_span, cur_a, max_height, clean_title, false);
       } else {
-        cleaveText(cur_span, cur_span, max_height, clean_content);
+        cleaveText(cur_span, cur_span, max_height, clean_content, true);
       }
     });
     pos++;
   });
 }
 
-function cleaveText(outer_wrap, inner_wrap, max_height, words) {
+function cleaveText(outer_wrap, inner_wrap, max_height, words, is_content) {
   var temp = ""
   var all_html = words.split(" ");
   inner_wrap.html("");
@@ -319,7 +323,12 @@ function cleaveText(outer_wrap, inner_wrap, max_height, words) {
     inner_wrap.html(temp);
   }
   if (i > 2 && outer_wrap.outerHeight() >= max_height) {
-    temp = temp.substring(0, Math.max(0, temp.length - all_html[i - 1].length - 1)) + " ...";
+    temp = temp.substring(0, Math.max(0, temp.length - all_html[i - 2].length - all_html[i - 1].length - 2)) + " ...";
+  }
+  if (is_content) {
+    temp = $('<div>' + temp + '</div>').html()
+      .replace(new RegExp('(' + query + ')', "ig"),
+        '<span style="font-weight:bold">$1</span>')
   }
   inner_wrap.html(temp);
 }
