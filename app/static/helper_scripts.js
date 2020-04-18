@@ -27,6 +27,9 @@ var results_ready = false;
 
 function getLegalTips() {
   query = document.getElementById("query_input").value.trim().toLowerCase();
+  query = query.split(" ").filter(function(c) {
+    return c != "";
+  }).join(" ");
   if (!query.match(/^[ 0-9a-z]+$/)) {
     alert("Please ensure query is alphanumeric");
     return;
@@ -326,9 +329,30 @@ function cleaveText(outer_wrap, inner_wrap, max_height, words, is_content) {
     temp = temp.substring(0, Math.max(0, temp.length - all_html[i - 2].length - all_html[i - 1].length - 2)) + " ...";
   }
   if (is_content) {
+    if (badString(query)) {
+      inner_wrap.html(temp);
+      return;
+    }
     temp = $('<div>' + temp + '</div>').html()
       .replace(new RegExp('(' + query + ')', "ig"),
-        '<span style="font-weight:bold">$1</span>')
+        '<span style="text-shadow: 1px 0 0">$1</span>');
+    var poss_strs = query.split(" ");
+    for (var x = 0; x < poss_strs.length; x++) {
+      var poss_str = poss_strs[x];
+      if (badString(poss_str)) {
+        continue;
+      }
+      if (poss_str.length >= 3) {
+        temp = $('<div>' + temp + '</div>').html()
+          .replace(new RegExp('(' + poss_str + ')', "ig"),
+            '<span style="text-shadow: 1px 0 0">$1</span>');
+      }
+    }
   }
   inner_wrap.html(temp);
+}
+
+function badString(str) {
+  return str == 'br' || str == 'nbsp' || str == 'span' || str == 'style' ||
+    str == 'text' || str == 'shadow' || str == '1px';
 }
