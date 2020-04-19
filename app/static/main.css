@@ -3,46 +3,49 @@
   from being shifted upon window resize events
 */
 div.ultimate_div {
-  margin: 0 auto;
-  padding: 0;
+  margin: 0;
   overflow-x: hidden;
+  padding: 0;
+  width: 100%;
 }
 
 /*
   Puts div in the center of its parent container
 */
 div.center_view {
-  width: 50%;
+  background-color: #3552FF;
   margin: 0 auto;
-  text-align: center;
+  padding: 0 20vw;
+  text-align: left;
+  width: 100%;
 }
 
 /*
   Container for page navigation
 */
 div.page_click_area {
-  width: 100%;
   margin: 0 auto;
   text-align: center;
+  width: 100%;
 }
 
 /*
   Container for results
 */
 div.middle_org {
-  width: 75%;
-  margin: 0 auto;
-  padding: 0 5em;
   display: inline-block;
-  text-align: center;
+  margin: 0 auto;
+  padding: 0 20vw;
+  text-align: left;
+  width: 100%;
 }
 
 /*
   Container for legal, case, or reddit information
 */
 div.fixed_container {
-  padding-bottom: 4.5em;
   overflow: hidden;
+  padding-bottom: 4.5em;
 }
 
 /*
@@ -65,8 +68,8 @@ div.bottom_padding {
   Increase padding a bit on top and bottom
 */
 .increase_padding {
-  padding-top: 3px;
   padding-bottom: 3px;
+  padding-top: 3px;
 }
 
 /*
@@ -81,12 +84,12 @@ div.bottom_padding {
 */
 .link_no_runon {
   display: inline-block;
-  padding-right: 50px;
-  overflow-wrap: anywhere;
   font-size: 1.5em;
   line-height: 1em;
   max-height: 12em;
+  overflow-wrap: anywhere;
   overflow: visible;
+  padding-right: 50px;
 }
 
 /*
@@ -94,24 +97,56 @@ div.bottom_padding {
 */
 .no_runon {
   display: block;
-  padding-right: 50px;
-  overflow-wrap: anywhere;
   line-height: 1.5em;
   max-height: 12em;
+  overflow-wrap: anywhere;
   overflow: visible;
+  padding-right: 50px;
 }
 
 /*
   Element forced to bottom of its container
 */
 .cont_bottom {
-  position: relative;
   bottom: 0;
-  padding-top: 3px;
   padding-bottom: 3px;
+  padding-top: 3px;
+  position: relative;
 }
 
 .btn {
-  background-color: #4285F4;
-  border: none
+  background-color: #7AD615;
+  border: none;
+  height: 64px;
+  width: 160px;
+}
+
+input[type=text] {
+  border-radius: 8px 0 0 8px;
+  color: #3552FF;
+  font-size: 16px;
+  height: 64px;
+  padding-left: 16px;
+  padding-right: 16px; 
+}
+
+select {
+  border-radius: 0 8px 8px 0;
+  font-size: 16px;
+  height: 64px;
+  padding-left: 16px;
+  width: 160px;
+}
+
+h1 {
+  color: white;
+}
+
+h3 {
+  color: #B8C2FF;
+}
+
+#search_area {
+  padding-bottom: 2vh;
+  padding-top: 10vh;
 }
