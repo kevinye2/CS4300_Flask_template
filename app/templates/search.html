@@ -115,10 +115,10 @@ so any removal or modification may cause errors and unexpected behavior -->
         some other element, event listeners and id must be kept-->
         <div class="increase_padding" id="category_selection">
           <button type="button" class="btn btn-info" style="background-color: #999" id="choose_codes" data-category="codes_info_container" onclick="setCategory(this)">
-            Laws
+            Legal statutes
           </button>
           <button type="button" class="btn btn-info" style="background-color: #999" id="choose_cases" data-category="cases_info_container" onclick="setCategory(this)">
-            Cases
+            Legal cases
           </button>
           <button type="button" class="btn btn-info" style="background-color: #999" id="choose_reddit" data-category="reddit_info_container" onclick="setCategory(this)">
             Reddit
@@ -134,7 +134,7 @@ so any removal or modification may cause errors and unexpected behavior -->
     -->
     <div id="results_area" class="bottom_padding">
       <div class="middle_org" id="codes_info_container" style="display: none">
-        <h3>Laws</h3>
+        <h2>Legal statutes</h2>
         <!-- The elements in codes_info_container are identical in purpose
               and structure to the other containers below.
             codes_info contains the actual text resulst for legal info, and
@@ -148,14 +148,14 @@ so any removal or modification may cause errors and unexpected behavior -->
         </div>
       </div>
       <div class="middle_org" id="cases_info_container" style="display: none">
-        <h3>Cases</h3>
+        <h2>Legal cases</h2>
         <div class="left_shift_text" id="cases_info"></div>
         <div class="page_click_area">
           <span class="increase_padding" id="cases_info_page_click"></span>
         </div>
       </div>
       <div class="middle_org" id="reddit_info_container" style="display: none">
-        <h3>Reddit</h3>
+        <h2 style="color: #FF4301">Reddit</h2>
         <div class="left_shift_text" id="reddit_info"></div>
         <div class="page_click_area">
           <span class="increase_padding" id="reddit_info_page_click"></span>

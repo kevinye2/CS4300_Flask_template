@@ -76,6 +76,7 @@ div.bottom_padding {
   Shifts all inner text left
 */
 .left_shift_text {
+  padding-top: 2vh;
   text-align: left;
 }
 
@@ -114,6 +115,9 @@ div.bottom_padding {
   position: relative;
 }
 
+/*
+  Primary button for search and result type selection
+*/
 .btn {
   background-color: #7AD615;
   border: none;
@@ -121,6 +125,9 @@ div.bottom_padding {
   width: 160px;
 }
 
+/* 
+  Primary search input
+*/
 input[type=text] {
   border-radius: 8px 0 0 8px;
   color: #3552FF;
@@ -130,6 +137,9 @@ input[type=text] {
   padding-right: 16px; 
 }
 
+/* 
+  Primary select input
+*/
 select {
   border-radius: 0 8px 8px 0;
   font-size: 16px;
@@ -138,14 +148,30 @@ select {
   width: 160px;
 }
 
+/* 
+  Primary title header
+*/
 h1 {
   color: white;
 }
 
+/* 
+  Results header
+*/
+h2 {
+  color: #3552FF;
+}
+
+/* 
+  Primary subtitle header 
+*/
 h3 {
   color: #B8C2FF;
 }
 
+/* 
+  Container for search form
+*/
 #search_area {
   padding-bottom: 2vh;
   padding-top: 10vh;
