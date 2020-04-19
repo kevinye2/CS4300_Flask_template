@@ -1,14 +1,30 @@
-from multiprocessing import Lock
+#from threading import Lock
+from gevent.lock import RLock
 from . import *
 from app.irsystem.models.helpers import *
 from app.irsystem.models.helpers import NumpyEncoder as NumpyEncoder
 from app.irsystem.models.search import *
 
-mutex = Lock()
+mutex = RLock()
+global_counter = 0
+global_array = []
 @irsystem.route('/', methods=['GET'])
 def initializeTemplate():
 	with mutex:
 		return render_template('search.html')
+
+@irsystem.route('/inccounter', methods=['GET'])
+def incCounter():
+	global global_counter
+	global_counter += 1
+	global_array.append(global_counter)
+	return Response('INCR', status=200,
+			content_type='text/plain')
+
+@irsystem.route('/globalcounter', methods=['GET'])
+def getCounter():
+	return Response(response=json.dumps({'lst':global_array}), status=200,
+		content_type='application/json')
 
 @irsystem.route('/postquery', methods=['POST'])
 def handleQuery():
