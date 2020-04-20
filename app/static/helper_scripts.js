@@ -405,11 +405,11 @@ function handleEllipsis(id, idxs, info_holder) {
       }
       var cur_idx = idxs[pos];
       var clean_title = $("<div>" + info_holder[cur_idx][0] + "</div>").text()
-        .replace(new RegExp("\n", "g"), "<br>")
-        .replace(new RegExp("\t", "g"), "&nbsp&nbsp&nbsp&nbsp");
+        .replace(new RegExp("\n", "g"), " ")
+        .replace(new RegExp("\t", "g"), "&nbsp&nbsp");
       var clean_content = $("<div>" + info_holder[cur_idx][1] + "</div>").text()
-        .replace(new RegExp("\n", "g"), "<br>")
-        .replace(new RegExp("\t", "g"), "&nbsp&nbsp&nbsp&nbsp");
+        .replace(new RegExp("\n", "g"), " ")
+        .replace(new RegExp("\t", "g"), "&nbsp&nbsp");
       var cur_span = $(this);
       var max_height = parseFloat(cur_span.css("max-height"));
       var cur_a;
