@@ -81,6 +81,14 @@ div.bottom_padding {
 }
 
 /*
+  Aligns elements vertically in the middle
+*/
+.middle_vert_align {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/*
   Specially formatted container limiting extent of text display
 */
 .link_no_runon {
@@ -125,7 +133,7 @@ div.bottom_padding {
   width: 160px;
 }
 
-/* 
+/*
   Primary search input
 */
 input[type=text] {
@@ -134,10 +142,10 @@ input[type=text] {
   font-size: 16px;
   height: 64px;
   padding-left: 16px;
-  padding-right: 16px; 
+  padding-right: 16px;
 }
 
-/* 
+/*
   Primary select input
 */
 select {
@@ -148,28 +156,28 @@ select {
   width: 160px;
 }
 
-/* 
+/*
   Primary title header
 */
 h1 {
   color: white;
 }
 
-/* 
+/*
   Results header
 */
 h2 {
   color: #3552FF;
 }
 
-/* 
-  Primary subtitle header 
+/*
+  Primary subtitle header
 */
 h3 {
   color: #B8C2FF;
 }
 
-/* 
+/*
   Container for search form
 */
 #search_area {
