@@ -293,7 +293,7 @@ function createIndividualResult(html_elem, id, link, title, content, rank) {
   }
   html_elem.insertAdjacentHTML("beforeend",
     '<div class="fixed_container"><span class="link_no_runon">' +
-    '<a target="_blank" href="' + link + '">' +
+    '<a target="_blank" href="' + link + '" rel="nofollow noopener noreferrer">' +
     '</a></span><span class="no_runon"></span><br>' +
     '<button class="btn btn-info" id=' + id +
     ' onclick="sendRelevanceFeedback(this)" data-rank="' + rank.toString() +
