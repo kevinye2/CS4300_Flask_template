@@ -1,30 +1,94 @@
+/*
+  Global variable for the input query
+*/
 var query;
+
+/*
+  Global variable for the input county
+*/
 var county;
+
+/*
+  Maximum number of results shown per page
+*/
 var results_per_page = 5;
+
+/*
+  Maximum page options actively displayed to the user
+*/
 var max_page_options = 10;
+
+/*
+  Dictionary holding all the legal code json
+*/
 var codes = {};
+
+/*
+  Dictionary holding all the legal cases json
+*/
 var cases = {};
+
+/*
+  Dictionary holding all the reddit json
+*/
 var reddit = {};
+
+/*
+  Dictionary identifying which documents had feedback sent successfully
+*/
 var feedbacks_sent = {};
+
+/*
+  Dictionary identifying which documents had feedback sent unsuccessfully
+*/
 var feedbacks_failed = {};
+
+/*
+  Which category was chosen to display, either legal codes, cases, or reddit
+*/
 var chosen_category = '';
+
+/*
+  The total number of pages for the code, case, and reddit categories
+*/
 var total_pages = {
   "codes_info": 1,
   "cases_info": 1,
   "reddit_info": 1
 };
+
+/*
+  The current page to be displayed for code, case, and reddit categories
+*/
 var cur_pages = {
   "codes_info": 1,
   "cases_info": 1,
   "reddit_info": 1
 };
+
+/*
+  Dictionary indicating which categories have data populated on them
+*/
 var populate_status = {
   "codes_info": false,
   "cases_info": false,
   "reddit_info": false
-}
+};
+
+/*
+  True if the user has successfully requested results for a query
+*/
 var results_ready = false;
 
+/*
+  Function that triggers upon a searh button press
+  The query is trimmed, turned entirely into lowercase, and excess whitespace
+  between words is removed.
+  There are various checks for the legitimacy of the inputs, including
+  how the query must be alphanumeric, all input options must be selected, etc.
+  Once the http request to the corresponding query route is successful,
+  innerHTMLHandler is called, and data is constructed and displayed
+*/
 function getLegalTips() {
   query = document.getElementById("query_input").value.trim().toLowerCase();
   query = query.split(" ").filter(function(c) {
@@ -68,6 +132,10 @@ function getLegalTips() {
   results_ready = false;
 }
 
+/*
+  Notifies corresponding http route that the document corresponding to elem
+  is relevant to the query and county input
+*/
 function sendRelevanceFeedback(elem) {
   if (elem.id in feedbacks_sent) {
     alert("Feedback already sent");
@@ -95,6 +163,11 @@ function sendRelevanceFeedback(elem) {
   requester.send(JSON.stringify(request_json_obj));
 }
 
+/*
+  Function that alters the color of the category selection buttons such that
+  the chosen one is green; relevant results are also displayed for the selected
+  category if possible.
+*/
 function setCategory(elem) {
   $("#choose_codes").attr("style", "background-color: #999");
   $("#choose_cases").attr("style", "background-color: #999");
@@ -107,6 +180,10 @@ function setCategory(elem) {
   }
 }
 
+/*
+  Fills the result area with relevant information of whatever category was
+  chosen
+*/
 function populateData() {
   if (chosen_category == "codes_info_container" && !populate_status['codes_info']) {
     populate_status['codes_info'] = true;
@@ -120,6 +197,10 @@ function populateData() {
   }
 }
 
+/*
+  Takes the result of the query request and creates the appropriate page
+  navigation structure and displays the relevant data
+*/
 function innerHTMLHandler(json_resp) {
   clearResultsAndVariables();
   codes = json_resp.legal_codes;
@@ -155,6 +236,9 @@ function innerHTMLHandler(json_resp) {
   populateData();
 }
 
+/*
+  Alters the display attributes of the display containers
+*/
 function showResults() {
   $("#codes_info_container").attr("style", "display: none");
   $("#cases_info_container").attr("style", "display: none");
@@ -162,12 +246,15 @@ function showResults() {
   $("#" + chosen_category).attr("style", "display: block");
 }
 
+/*
+  Resets relevant global variables and display area
+*/
 function clearResultsAndVariables() {
   populate_status = {
     "codes_info": false,
     "cases_info": false,
     "reddit_info": false
-  }
+  };
   cur_pages = {
     "codes_info": 1,
     "cases_info": 1,
@@ -183,6 +270,9 @@ function clearResultsAndVariables() {
   clearHTMLElement("reddit_info_page_click");
 }
 
+/*
+  Completely clears an html element of all child elements
+*/
 function clearHTMLElement(id) {
   temp = document.getElementById(id);
   while (temp.firstChild) {
@@ -190,17 +280,20 @@ function clearHTMLElement(id) {
   }
 }
 
+/*
+  Inserts the framework HTML to display the relevant data
+*/
 function createIndividualResult(html_elem, id, link, title, content, rank) {
   var msg = "Relevant";
   if (id in feedbacks_sent) {
     msg = "Feedback sent!";
   }
   if (id in feedbacks_failed && feedbacks_failed[id]) {
-    msg = "Could not send, try again"
+    msg = "Could not send, try again";
   }
   html_elem.insertAdjacentHTML("beforeend",
     '<div class="fixed_container"><span class="link_no_runon">' +
-    '<a target="_blank" href="' + link + '">' +
+    '<a target="_blank" href="' + link + '" rel="nofollow noopener noreferrer">' +
     '</a></span><span class="no_runon"></span><br>' +
     '<button class="btn btn-info" id=' + id +
     ' onclick="sendRelevanceFeedback(this)" data-rank="' + rank.toString() +
@@ -208,6 +301,9 @@ function createIndividualResult(html_elem, id, link, title, content, rank) {
   );
 }
 
+/*
+  Creates the page navigation structure through html insertion
+*/
 function createPageClickRange(html_elem, id, start_page, total_pages) {
   if (cur_pages[id] > 1) {
     html_elem.insertAdjacentHTML("beforeend",
@@ -234,6 +330,9 @@ function createPageClickRange(html_elem, id, start_page, total_pages) {
   }
 }
 
+/*
+  Changes the data displayed based on the new page the user navigates to
+*/
 function pageChange(html_elem, id, data, new_page) {
   if (new_page == "next") {
     cur_pages[id] += 1;
@@ -250,6 +349,9 @@ function pageChange(html_elem, id, data, new_page) {
   addCleanText(id, data.length);
 }
 
+/*
+  Deals with a page click action and initiates process of page change
+*/
 function handlePageClick(sel) {
   if (sel.dataset.pagenum == cur_pages[sel.dataset.infoclass]) {
     return;
@@ -272,6 +374,9 @@ function handlePageClick(sel) {
   document.getElementById("results_area").setAttribute("style", "visibility: visible");
 }
 
+/*
+  Initiates the specific action of cleaning, modifying the data to be displayed
+*/
 function addCleanText(id, max_length) {
   var cur_page = cur_pages[id];
   var index_holder = [];
@@ -287,6 +392,10 @@ function addCleanText(id, max_length) {
   }
 }
 
+/*
+  Removes excess HTML from data to be displayed and sends the clean
+  result to cleaveText for appropriate text truncation and ellipse placement
+*/
 function handleEllipsis(id, idxs, info_holder) {
   var pos = 0;
   $("#" + id).find("div").each(function() {
@@ -315,6 +424,10 @@ function handleEllipsis(id, idxs, info_holder) {
   });
 }
 
+/*
+  Truncates text to fit within its div, places ellipses at the end, and "bolds"
+  relevant query terms within the description text
+*/
 function cleaveText(outer_wrap, inner_wrap, max_height, words, is_content) {
   var temp = ""
   var all_html = words.split(" ");
@@ -352,6 +465,9 @@ function cleaveText(outer_wrap, inner_wrap, max_height, words, is_content) {
   inner_wrap.html(temp);
 }
 
+/*
+  Determines if a string potentially corresponds to html tag terms
+*/
 function badString(str) {
   return str == 'br' || str == 'nbsp' || str == 'span' || str == 'style' ||
     str == 'text' || str == 'shadow' || str == '1px';

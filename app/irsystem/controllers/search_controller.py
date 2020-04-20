@@ -1,10 +1,11 @@
-from multiprocessing import Lock
+#from threading import Lock
+from gevent.lock import RLock
 from . import *
 from app.irsystem.models.helpers import *
 from app.irsystem.models.helpers import NumpyEncoder as NumpyEncoder
 from app.irsystem.models.search import *
 
-mutex = Lock()
+mutex = RLock()
 @irsystem.route('/', methods=['GET'])
 def initializeTemplate():
 	with mutex:

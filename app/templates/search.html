@@ -8,8 +8,10 @@
   <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha256-pasqAKBDmFT4eHoN2ndd6lN370kFiGUFyTiUHWhU7k8=" crossorigin="anonymous"></script>
   <script>
     $(document).ready(function() {
-      $("#ultimate_div").css("width", window.screen.width * 0.75);
-      $("#ultimate_div").css("padding-top", window.screen.width * 0.05);
+      $("#ultimate_div").css("width", window.screen.width);
+      // $("#ultimate_div").css("padding-top", window.screen.width * 0.05);
+      // $("#ultimate_div").css("padding-left", window.screen.width * 0.05);
+      // $("#ultimate_div").css("padding-right", window.screen.width * 0.05);
     });
   </script>
 </head>
@@ -21,29 +23,27 @@ so any removal or modification may cause errors and unexpected behavior -->
   around during window resize events -->
   <div id="ultimate_div" class="ultimate_div">
     <!-- Within ultimate_div, there are 3 primary container divs (based on id):
-            title_area: Where the introductory text is displayed to user
             search_area: Where the user can input query, county, category
             results_area: Where the user can see the resulting documents
     -->
-    <div id="title_area" class="center_view">
-      <h1>Legal ProTips: Coronavirus Help Provider</h1>
-    </div>
-    <div class="center_view" id="search_area">
+    <div id="search_area" class="center_view">
       <!-- The search_area is composed of a form with 3 elements:
               query_input: Where user inputs tet
               county_selection: Where user selects a county from a dropdown
               category_selection: Where user selects whether they want law,
                 case, or reddit
       -->
+      <h1>Know your rights.</h1>
+      <h3>COVID is affecting everyone in unique ways, but one thing unites us all – our rights. We’re here to help.</h3>
       <form id="query_form">
         <!-- The custom CSS allows the query_input and county_selection to have
         equivalent vertical height and alignment, although imported themes
         may have different alignments. Potentially utilize jquery to manually
         set element height and alignment if necessary -->
-        <input class="increase_margins" type="text" id="query_input" name="query_input2" placeholder="Enter your legal concern">
+        <input class="increase_margins" type="text" id="query_input" name="query_input2" placeholder="My landlord is demanding rent…">
         </input>
-        <select class="increase_padding" id="county_selection" name="county_selection" placeholder="Choose a county">
-          <option value="" disabled selected hidden>County</option>
+        <select class="increase_padding" id="county_selection" name="county_selection" placeholder="Select county">
+          <option value="" disabled selected hidden>Select county</option>
           <option value="Albany">Albany</option>
           <option value="Allegany">Allegany</option>
           <option value="Bronx">Bronx</option>
@@ -107,23 +107,21 @@ so any removal or modification may cause errors and unexpected behavior -->
           <option value="Wyoming">Wyoming</option>
           <option value="Yates">Yates</option>
         </select>
+        <button type="button" class="btn btn-info" id="query_submit" onclick="getLegalTips()">
+          Search
+        </button>
         <!-- The colors of each button within category_selection are controlled
         by jquery code within helper_scripts.js; if buttons are replaced by
         some other element, event listeners and id must be kept-->
         <div class="increase_padding" id="category_selection">
           <button type="button" class="btn btn-info" style="background-color: #999" id="choose_codes" data-category="codes_info_container" onclick="setCategory(this)">
-            Laws
+            Legal statutes
           </button>
           <button type="button" class="btn btn-info" style="background-color: #999" id="choose_cases" data-category="cases_info_container" onclick="setCategory(this)">
-            Cases
+            Legal cases
           </button>
           <button type="button" class="btn btn-info" style="background-color: #999" id="choose_reddit" data-category="reddit_info_container" onclick="setCategory(this)">
             Reddit
-          </button>
-        </div>
-        <div class="increase_padding">
-          <button type="button" class="btn btn-info" id="query_submit" onclick="getLegalTips()">
-            Search
           </button>
         </div>
       </form>
@@ -136,7 +134,7 @@ so any removal or modification may cause errors and unexpected behavior -->
     -->
     <div id="results_area" class="bottom_padding">
       <div class="middle_org" id="codes_info_container" style="display: none">
-        <h3>Relevant Legal Statutes</h3>
+        <h2>Legal statutes</h2>
         <!-- The elements in codes_info_container are identical in purpose
               and structure to the other containers below.
             codes_info contains the actual text resulst for legal info, and
@@ -150,14 +148,14 @@ so any removal or modification may cause errors and unexpected behavior -->
         </div>
       </div>
       <div class="middle_org" id="cases_info_container" style="display: none">
-        <h3>Relevant Legal Cases</h3>
+        <h2>Legal cases</h2>
         <div class="left_shift_text" id="cases_info"></div>
         <div class="page_click_area">
           <span class="increase_padding" id="cases_info_page_click"></span>
         </div>
       </div>
       <div class="middle_org" id="reddit_info_container" style="display: none">
-        <h3>Relevant Reddit Posts</h3>
+        <h2 style="color: #FF4301">Reddit</h2>
         <div class="left_shift_text" id="reddit_info"></div>
         <div class="page_click_area">
           <span class="increase_padding" id="reddit_info_page_click"></span>
