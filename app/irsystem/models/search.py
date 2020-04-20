@@ -13,6 +13,7 @@ import string
 from scipy.sparse.csr import csr_matrix
 from sklearn.feature_extraction.text import TfidfTransformer, TfidfVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
+from bs4 import BeautifulSoup
 
 
 def getCases(query, county):
@@ -102,13 +103,24 @@ def cleanCases(legal_cases):
     Preprocesses legal cases to extract and concat case titles and body
 
     Parameters:
-        legal_cases: list of tuples of legal cases from Case Law API
+        legal_cases: list of tuples of legal cases from Case Law API:
+            list of tuples in the form of
+                [
+                    ('Statute title', 'description', id, url),
+                    ...
+                ],
     Returns:
         tuple of lists, where the first element is a list of case IDs and
         the second element is an array where each element is the corresponding text
         (title and body text concatenated together) for that case.
     '''
-    raise NotImplemented()
+    ret = ([], [])
+    for elem in legal_cases:
+        html_str = BeautifulSoup(elem[0] + ' ' + elem[1])
+        text_str = cleanText(html_str.get_text())
+        ret[0].append(elem[2])
+        ret[1].append(text_str)
+    return ret
 
 
 def cleanRedditPosts(reddit_posts):

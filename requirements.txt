@@ -3,6 +3,7 @@ aniso8601==8.0.0
 appdirs==1.4.3
 autoenv==1.0.0
 bcrypt==3.1.7
+beautifulsoup4==4.9.0
 certifi==2019.11.28
 cffi==1.14.0
 chardet==3.0.4
@@ -34,6 +35,7 @@ mysql-connector==2.2.9
 nltk==3.4.5
 numpy==1.18.1
 packaging==20.1
+pandas==1.0.3
 praw==6.5.1
 psycopg2==2.7.7
 pycparser==2.19
