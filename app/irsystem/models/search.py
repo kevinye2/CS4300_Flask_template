@@ -12,7 +12,7 @@ def getCases(query, county):
     returns:
         list of tuples in the form of
             [
-                ('Statute title', 'description', id, url),
+                ('case title', 'description', id, url),
                 ...
             ],
     '''
@@ -73,24 +73,7 @@ def legalTipResp(query, county):
             'code_' + str(i*i),
             'https://legislation.nysenate.gov/static/docs/html/index.html#'))
     resp_object['legal_codes'] = temp
-    # temp = []
-    # for i in range(94):
-    #     temp_title = ''
-    #     temp_content = ''
-    #     for j in range(100):
-    #         for k in range(random.choice(range(1, 21))):
-    #             if j < 20:
-    #                 temp_title += random.choice(total_string)
-    #             temp_content += random.choice(total_string)
-    #         temp_title += ' '
-    #         temp_content += ' '
-    #     temp.append((
-    #         str(i) + temp_title + str(i),
-    #         str(i) + temp_content + str(i),
-    #         'case_' + str(i*i),
-    #         'https://case.law/'))
-    # resp_object['legal_cases'] = temp
-    ###getting Caselaw data from API using helper function getCases()###
+
     resp_object['legal_cases'] = getCases(query, county)
     temp = []
     for i in range(93):
