@@ -319,15 +319,29 @@ def booleanSearch(query, county, laws):
     query = cleanText(query)
     query = query + ' ' + county
     inverted_index = buildInvertedIndex(laws)
-    print(inverted_index)
     docs_with_query_word = []
     for query_word in query:
         docs_with_query_word += [doc_id for doc_id,
                                  _ in enumerate(inverted_index[query_word])]
 
     doc_corr_counts = Counter(docs_with_query_word)
-    ranking = [laws[item[0]] for item in doc_corr_counts.most_common(3)]
+    ranking = [item[0] for item in doc_corr_counts.most_common(3)]
+
     return ranking
+
+
+def formatLawsRanking(ranking, laws, law_ids):
+    '''
+    '''
+    result = []
+    for item in ranking:
+        temp = []
+        temp.append(law_ids[item])  # title
+        temp.append(laws[item])  # content
+        temp.append(item)  # id
+        temp.append('static json file')  # url
+        result.append(temp)
+    return result
 
 
 def legalTipResp(query, county):
@@ -373,6 +387,7 @@ def legalTipResp(query, county):
 
     # Brute force boolean search on laws
     ranked_laws = booleanSearch(query, county, laws[1])
+    ranked_laws = formatLawsRanking(ranked_laws, laws[1], laws[0])
     # print(ranked_laws)
     # Getting TF-IDF matrices
     # reddit_tfidf = tfidfVectorize(reddit_posts_clean[0], reddit_posts_clean[1])
