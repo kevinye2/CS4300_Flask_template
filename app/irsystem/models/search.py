@@ -14,6 +14,9 @@ from scipy.sparse.csr import csr_matrix
 from sklearn.feature_extraction.text import TfidfTransformer, TfidfVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
 from bs4 import BeautifulSoup
+import json
+from flask import Flask, render_template, url_for, json
+from collections import defaultdict, Counter
 
 
 def getCases(query, county):
@@ -79,6 +82,27 @@ def getReddit(query, county):
     return all_reddit
 
 
+def getLegalCodes():
+    '''
+    returns a list of static, raw json files taken from static data/ folder
+
+    parameters:
+        n/a
+    returns:
+        list of dictionaries (json files)
+    '''
+    DATA_ROOT = os.path.realpath(os.path.dirname('app/data'))
+    static_data_path = os.listdir(os.path.join(DATA_ROOT, 'data'))
+    data = []
+    for filename in static_data_path:
+        law_file_path = os.path.join(DATA_ROOT, 'data', filename)
+        law_file = json.load(open(law_file_path))
+        data.append(law_file)
+
+    # print(data[0]['result'])
+    return data
+
+
 def cleanText(s):
     '''
     Standard text cleaning and preprocessing:
@@ -95,7 +119,43 @@ def cleanText(s):
     s.translate(str.maketrans('', '', string.punctuation))
     s = ' '.join([word for word in s.split() if len(word) > 2])
     s = s.replace("'", "")
+    s = s.replace("\\n", "")
     return s
+
+
+def cleanLaws(laws):
+    '''
+    Preprocess laws to extract and concat law titles and body
+
+    Parameters:
+        laws: list of dictionaries, where each dictionary represents a static
+            json file extracted from the static data/ folder
+    Returns:
+        tuple of lists, where the first element is a list of law IDs and the
+        second element is an array where each element is the corresponding text
+        (title and body text concatenated together) for that law.
+    '''
+    law_ids = []
+    cleaned_laws = []
+    title = laws[0]['result']['documents']['title']
+    # print(laws[0]['result']['documents']['title'])
+    for law in laws:
+        title = law['result']['documents']['title']
+        title = cleanText(title)
+        law_type = law['result']['documents']['lawName']
+        law_type = cleanText(law_type)
+
+        law_text = ''
+        items_path = law['result']['documents']['documents']['items']
+        for item in items_path:
+            item_text = item['text']
+            item_text = cleanText(item_text)
+            law_text += item_text + ' '
+        full_law_text_feature = title + ' ' + law_type + ' ' + law_text
+        law_ids.append(law['result']['info']['lawId'])
+        cleaned_laws.append(full_law_text_feature)
+
+    return (law_ids, cleaned_laws)
 
 
 def cleanCases(legal_cases):
@@ -238,6 +298,35 @@ def getRanking(query, tfidf_matrix, doc_ids, corpus):
     raise NotImplemented()
 
 
+def buildInvertedIndex(laws):
+    '''
+    '''
+    inv_index = defaultdict(list)
+    for idx, law in enumerate(laws):
+        for token in law.split():
+            token = token.lower()
+            inv_index[token].append(idx)
+    return inv_index
+
+
+def booleanSearch(query, county, laws):
+    '''
+    Version of boolean search that ranks items based on raw number of
+    token correspondences in query and docs.
+    '''
+    query = cleanText(query)
+    query = query + ' ' + county
+    inverted_index = buildInvertedIndex(laws)
+    docs_with_query_word = []
+    for query_word in query:
+        docs_with_query_word += [doc_id for doc_id,
+                                 _ in enumerate(inverted_index[query_word])]
+
+    doc_corr_counts = Counter(docs_with_query_word)
+    ranking = [laws[item[0]] for item in doc_corr_counts.most_common(3)]
+    return ranking
+
+
 def legalTipResp(query, county):
     '''
     parameters:
@@ -268,53 +357,23 @@ def legalTipResp(query, county):
     '''
     ###Follow the template; replace this code###
     resp_object = {}
-    temp = []
-    total_string = string.ascii_lowercase + string.ascii_uppercase + string.digits
-    for i in range(107):
-        temp_title = ''
-        temp_content = ''
-        for j in range(100):
-            for k in range(random.choice(range(1, 21))):
-                if j < 20:
-                    temp_title += random.choice(total_string)
-                temp_content += random.choice(total_string)
-            temp_title += ' '
-            temp_content += ' '
-        temp.append((
-            str(i) + temp_title + str(i),
-            str(i) + temp_content + str(i),
-            'code_' + str(i*i),
-            'https://legislation.nysenate.gov/static/docs/html/index.html#'))
-    resp_object['legal_codes'] = temp
-    # temp = []
-    # for i in range(94):
-    #     temp_title = ''
-    #     temp_content = ''
-    #     for j in range(100):
-    #         for k in range(random.choice(range(1, 21))):
-    #             if j < 20:
-    #                 temp_title += random.choice(total_string)
-    #             temp_content += random.choice(total_string)
-    #         temp_title += ' '
-    #         temp_content += ' '
-    #     temp.append((
-    #         str(i) + temp_title + str(i),
-    #         str(i) + temp_content + str(i),
-    #         'case_' + str(i*i),
-    #         'https://case.law/'))
-    # resp_object['legal_cases'] = temp
 
     ###getting Caselaw data from API using helper function getCases()###
     legal_cases = getCases(query, county)
     reddit_posts = getReddit(query, county)
+    laws = getLegalCodes()
 
     # Cleaning the data returned by APIs
     # legal_cases_clean = cleanCases(legal_cases)
     reddit_posts_clean = cleanRedditPosts(reddit_posts)
+    laws = cleanLaws(laws)
 
+    # Brute force boolean search on laws
+    ranked_laws = booleanSearch(query, county, laws[1])
+    # print(ranked_laws)
     # Getting TF-IDF matrices
-    reddit_tfidf = tfidfVectorize(reddit_posts_clean[0], reddit_posts_clean[1])
-    tfidf_scores_by_category = {'reddit_posts': reddit_tfidf}
+    # reddit_tfidf = tfidfVectorize(reddit_posts_clean[0], reddit_posts_clean[1])
+    # tfidf_scores_by_category = {'reddit_posts': reddit_tfidf}
 
     # TODO: query expansion using Rocchio
 
@@ -322,6 +381,8 @@ def legalTipResp(query, county):
     # reddit_ranking = getRanking()
 
     # Generating response
+    print(ranked_laws)
+    resp_object['legal_codes'] = ranked_laws
     resp_object['legal_cases'] = legal_cases
     resp_object['reddit_posts'] = reddit_posts
 
