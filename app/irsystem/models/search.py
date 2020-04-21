@@ -118,8 +118,9 @@ def cleanText(s):
         processed string s
     '''
     s = s.lower()
-    s = re.sub(r'[^ 0-9a-z]', '', s)
+    s.translate(str.maketrans('', '', string.punctuation))
     s = ' '.join([word for word in s.split() if len(word) > 2])
+    s = s.replace("'", "")
     s = s.replace("\\n", "")
     return s
 
@@ -318,6 +319,7 @@ def booleanSearch(query, county, laws):
     query = cleanText(query)
     query = query + ' ' + county
     inverted_index = buildInvertedIndex(laws)
+    print(inverted_index)
     docs_with_query_word = []
     for query_word in query:
         docs_with_query_word += [doc_id for doc_id,
@@ -382,7 +384,6 @@ def legalTipResp(query, county):
     # reddit_ranking = getRanking()
 
     # Generating response
-    print(ranked_laws)
     resp_object['legal_codes'] = ranked_laws
     resp_object['legal_cases'] = legal_cases
     resp_object['reddit_posts'] = reddit_posts
