@@ -307,7 +307,7 @@ def legalTipResp(query, county):
     # TODO: query expansion using Rocchio
 
     # Getting a ranking based on cosine similarity
-    reddit_ranking = getRanking()
+    # reddit_ranking = getRanking()
 
     # Generating response
     resp_object['legal_cases'] = legal_cases
