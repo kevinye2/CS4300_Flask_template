@@ -1,3 +1,7 @@
+import re
+from collections import defaultdict, Counter
+from flask import Flask, render_template, url_for, json
+import json
 from . import *
 from app.irsystem.models.helpers import *
 import random
@@ -14,8 +18,6 @@ from scipy.sparse.csr import csr_matrix
 from sklearn.feature_extraction.text import TfidfTransformer, TfidfVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
 from bs4 import BeautifulSoup
-import json
-from flask import Flask, render_template, url_for, json
 from collections import defaultdict, Counter
 
 
@@ -115,10 +117,9 @@ def cleanText(s):
     Returns:
         processed string s
     '''
-    s.lower()
-    s.translate(str.maketrans('', '', string.punctuation))
+    s = s.lower()
+    s = re.sub(r'[^ 0-9a-z]', '', s)
     s = ' '.join([word for word in s.split() if len(word) > 2])
-    s = s.replace("'", "")
     s = s.replace("\\n", "")
     return s
 
