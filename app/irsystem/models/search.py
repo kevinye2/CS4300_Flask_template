@@ -56,6 +56,11 @@ def getReddit(query, county):
                 ('Reddit article title', 'text body', id, url),
                 ...
             ],
+        and dictionary of reddit content
+            {
+            'id': ('Reddit article title', 'text body', url)
+            ...
+            }
     '''
     start_time = time.time()
     ###does not filter by county yet###
@@ -70,6 +75,7 @@ def getReddit(query, county):
     data = r.json()
     # pprint.pprint(data)
     all_reddit = []
+    reddit_dict = {}
     for sub in data['data']['children']:
         # TF-IDF ranking will eventually be performed on the feature vector of, title + body.
         # Currently, posts can be links (ONLY having a url), or a body (i.e. a selftext). So submission.selftext could sometimes be empty (may need to filter?).
@@ -78,10 +84,12 @@ def getReddit(query, county):
         submission = sub['data']
         all_reddit.append((submission['title'], "~Text~:" + submission['selftext'],
                            submission['id'], reddit_base_url + submission['permalink']))
+        reddit_dict[submission['id']] = (submission['title'], "~Text~:" + submission['selftext'],
+                            reddit_base_url + submission['permalink'])
     end_time = time.time()
     print('Finished pulling from Reddit API')
     print("took {:.4f}s".format(end_time - start_time))
-    return all_reddit
+    return all_reddit, reddit_dict
 
 
 def getLegalCodes():
@@ -124,6 +132,19 @@ def cleanText(s):
     s = s.replace("\\n", "")
     return s
 
+def alphanumericOnly(s):
+    '''
+    Only keep alphanumeric and regular space in s
+
+    Parameters:
+        s: string that represents the text to be processed
+    Returns:
+        processed string s
+    '''
+    s = s.lower()
+    s = re.sub(r'[^ #.0-9a-z]', ' ', s)
+    s = ' '.join([word for word in s.split() if len(word) > 2])
+    return s
 
 def cleanLaws(laws):
     '''
@@ -209,96 +230,73 @@ def cleanRedditPosts(reddit_posts):
 
     return (post_ids, post_data)
 
-
-def getTfidfScores(doc_ids, docs):
-    '''
-    Computes Tf-idf scores for given docs.
-
-    Parameters:
-        doc_ids: unique IDs to identify corresponding docs
-        docs: list of strings, where each string is a complete document
-    Returns:
-        tuple of (TF-IDF matrix, list of feature names)
-    '''
-    tf = TfidfVectorizer()
-    tfidf_matrix = tf.fit_transform(docs)
-    feature_names = tf.get_feature_names()
-    # cv = CountVectorizer()
-    # word_counts = cv.fit_transform(docs)
-
-    # transformer = TfidfTransformer()
-    # transformer.fit(word_counts)
-
-    # sparse_word_counts = cv.transform(docs)
-    # tfidf_scores = transformer.transform(sparse_word_counts)
-    # feature_names = cv.get_feature_names()
-
-    return (tfidf_matrix, feature_names)
-
-
 def tfidfVectorize(doc_ids, docs):
     '''
-    Wrapper function that returns a tuple of tfidf scores and features names
-    by calling getTfidfScores
-    TODO: possibly more analysis logic in here
+    Return tf-idf scores of docs
 
     Parameters:
         doc_ids: unique IDs to identify corresponding docs
         docs: list of strings, where each string is a complete document
     Returns:
-        tuple of (TF-IDF matrix, list of feature names)
+        tuple of (TF-IDF matrix, list of feature names, idf array, and dictionary of feature indexes)
     '''
-    # docs = ["the house had a tiny little mouse",
-    #         "the cat saw the mouse",
-    #         "the mouse ran away from the house",
-    #         "the cat finally ate the mouse",
-    #         "the end of the mouse story"
-    #         ]
-    tfidf_matrix, feature_names = getTfidfScores(doc_ids, docs)
-    # doc = 0
-    # feature_index = tfidf_matrix[doc, :].nonzero()[1]
-    # tfidf_scores = zip(
-    #     feature_index, [tfidf_matrix[doc, x] for x in feature_index])
-    # for w, s in [(feature_names[i], s) for (i, s) in tfidf_scores]:
-    #     print(w, s)
-    # return (tfidf_scores, feature_names)
-    return (tfidf_matrix, feature_names)
+    tf = TfidfVectorizer(max_df=0.9, min_df=0.01)
+    tfidf_matrix = tf.fit_transform(docs).toarray()
+    feature_names = tf.get_feature_names()
+    feature_idx_dict = {}
+    for idx, elem in enumerate(feature_names):
+        feature_idx_dict[elem] = idx
+    return tfidf_matrix, feature_names, tf.idf_, feature_idx_dict
 
-
-def getCossim(query, tfidf_matrix):
+def getRankings(query, doc_ids, tfidf_matrix, feature_names, idf_array, feature_idx_dict):
     '''
-    Compute cosine similarity between the query and corpus of docs represented
+    Compute resulting ranking cosine similarity between the query and corpus of docs represented
     by the TF-IDF matrix.
 
     parameters:
         query: string representing user's query
-        doc_index: index of the document in TF-IDF matrix with which to compute
-        cosine similarity
+        doc_ids: List of doc_ids, ordered congruently to the corresponding
+        rows of tfidf_matrix
         tfidf_matrix: TF-IDF matrix where each row corresponds to a document
+        feature_names: List of all tokens, indexed corresponding to the columns
+        of tfidf_matrix
+        idf_array: List of all idf values, indexed per corresponding query index
+        feature_idx_dict: Dictionary of key: query, value: corresponding index
+        in idf_array and feature_names
     returns:
-
+        Sorted (ranked) list of doc_id, most relevant first
     '''
-    raise NotImplemented()
-
-
-def getRanking(query, tfidf_matrix, doc_ids, corpus):
-    '''
-    Generates a ranking based on cosine similarity of the query and corpus of
-    documents from one of {reddit posts, cases, laws}.
-
-    parameters:
-        query: string representing user's query
-        tfidf_matrix: TF-IDF matrix where each row corresponds to a document
-        doc_ids: IDs of documents with 1-to-1 correspondence to the rows in
-        tfidf_matrix
-        corpus: string indicator of which corpus we are ranking. Has to be
-        one of 'reddit'/'cases'/'laws'
-    returns:
-        Sorted (ranked) list of tuples where each tuple is (rank, doc_id)
-    '''
-    getCossim()
-    raise NotImplemented()
-
+    query_tok_tfidf = {}
+    query_split = query.split()
+    query_idxs = []
+    ret = []
+    # Counting the frequency for valid query tokens
+    for tok in query_split:
+        if not tok in feature_idx_dict:
+            continue
+        elif tok in query_tok_tfidf:
+            query_tok_tfidf[tok] += 1
+        else:
+            query_tok_tfidf[tok] = 1
+    # Multiplying term frequencies by idf
+    for tok in query_tok_tfidf:
+        idx = feature_idx_dict[tok]
+        idf_val = idf_array[idx]
+        query_idxs.append(idx)
+        query_tok_tfidf[tok] *= idf_val
+    query_idxs.sort()
+    query_tfidf_vec = np.zeros(len(query_idxs))
+    truncated_tfidf_mat = np.take(tfidf_matrix, query_idxs, axis=-1)
+    for i in range(len(query_tfidf_vec)):
+        feature = feature_names[query_idxs[i]]
+        query_tfidf_vec[i] = query_tok_tfidf[feature]
+    query_tfidf_vec /= np.sqrt(np.sum(query_tfidf_vec ** 2))
+    ranked_res = np.sum(np.multiply(query_tfidf_vec, truncated_tfidf_mat),
+        axis=-1)
+    sorted_idx_ranked_res = np.flip(np.argsort(ranked_res))
+    for i, idx in enumerate(sorted_idx_ranked_res):
+        ret.append(doc_ids[idx])
+    return ret
 
 def buildInvertedIndex(laws):
     '''
@@ -377,7 +375,7 @@ def legalTipResp(query, county):
 
     ###getting Caselaw data from API using helper function getCases()###
     legal_cases = getCases(query, county)
-    reddit_posts = getReddit(query, county)
+    reddit_posts, reddit_dict = getReddit(query, county)
     laws = getLegalCodes()
 
     # Cleaning the data returned by APIs
@@ -388,10 +386,17 @@ def legalTipResp(query, county):
     # Brute force boolean search on laws
     ranked_laws = booleanSearch(query, county, laws[1])
     ranked_laws = formatLawsRanking(ranked_laws, laws[1], laws[0])
-    # print(ranked_laws)
+
     # Getting TF-IDF matrices
-    # reddit_tfidf = tfidfVectorize(reddit_posts_clean[0], reddit_posts_clean[1])
-    # tfidf_scores_by_category = {'reddit_posts': reddit_tfidf}
+    reddit_tfidf, reddit_feat, reddit_idf, reddit_idx_dict = tfidfVectorize(reddit_posts_clean[0],
+        map(lambda x: alphanumericOnly(x), reddit_posts_clean[1]))
+    tfidf_scores_by_category = {'reddit_posts': reddit_tfidf}
+    reddit_rankings = getRankings(query,
+        reddit_posts_clean[0], reddit_tfidf, reddit_feat, reddit_idf, reddit_idx_dict)
+    ret_reddit = []
+    for doc_id in reddit_rankings:
+        content = reddit_dict[doc_id]
+        ret_reddit.append((content[0], content[1], doc_id, content[2]))
 
     # TODO: query expansion using Rocchio
 
@@ -401,7 +406,7 @@ def legalTipResp(query, county):
     # Generating response
     resp_object['legal_codes'] = ranked_laws
     resp_object['legal_cases'] = legal_cases
-    resp_object['reddit_posts'] = reddit_posts
+    resp_object['reddit_posts'] = ret_reddit
 
     return resp_object
 
