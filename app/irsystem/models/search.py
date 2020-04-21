@@ -29,7 +29,7 @@ def getCases(query, county):
     returns:
         list of tuples in the form of
             [
-                ('Statute title', 'description', id, url),
+                ('case title', 'description', id, url),
                 ...
             ],
     '''

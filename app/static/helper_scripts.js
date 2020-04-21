@@ -293,7 +293,7 @@ function createIndividualResult(html_elem, id, link, title, content, rank) {
   }
   html_elem.insertAdjacentHTML("beforeend",
     '<div class="fixed_container"><span class="link_no_runon">' +
-    '<a target="_blank" href="' + link + '">' +
+    '<a target="_blank" href="' + link + '" rel="nofollow noopener noreferrer">' +
     '</a></span><span class="no_runon"></span><br>' +
     '<button class="btn btn-info" id=' + id +
     ' onclick="sendRelevanceFeedback(this)" data-rank="' + rank.toString() +
@@ -405,11 +405,11 @@ function handleEllipsis(id, idxs, info_holder) {
       }
       var cur_idx = idxs[pos];
       var clean_title = $("<div>" + info_holder[cur_idx][0] + "</div>").text()
-        .replace(new RegExp("\n", "g"), "<br>")
-        .replace(new RegExp("\t", "g"), "&nbsp&nbsp&nbsp&nbsp");
+        .replace(new RegExp("\n", "g"), " ")
+        .replace(new RegExp("\t", "g"), "&nbsp&nbsp");
       var clean_content = $("<div>" + info_holder[cur_idx][1] + "</div>").text()
-        .replace(new RegExp("\n", "g"), "<br>")
-        .replace(new RegExp("\t", "g"), "&nbsp&nbsp&nbsp&nbsp");
+        .replace(new RegExp("\n", "g"), " ")
+        .replace(new RegExp("\t", "g"), "&nbsp&nbsp");
       var cur_span = $(this);
       var max_height = parseFloat(cur_span.css("max-height"));
       var cur_a;
