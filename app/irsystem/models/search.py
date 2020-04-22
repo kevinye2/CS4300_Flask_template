@@ -320,9 +320,9 @@ def booleanSearch(query, county, laws):
     query = query + ' ' + county
     inverted_index = buildInvertedIndex(laws)
     docs_with_query_word = []
-    for query_word in query:
-        docs_with_query_word += [doc_id for doc_id,
-                                 _ in enumerate(inverted_index[query_word])]
+    for query_word in query.split():
+        docs_with_query_word += [doc_id for _,
+                                 doc_id in enumerate(inverted_index[query_word])]
 
     doc_corr_counts = Counter(docs_with_query_word)
     ranking = [item[0] for item in doc_corr_counts.most_common(3)]
