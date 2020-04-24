@@ -81,14 +81,17 @@ class TFIDFHolder():
             query_idxs.append(idx)
             query_tok_tfidf[tok] *= idf_val
         query_idxs.sort()
-        query_tfidf_vec = np.zeros(len(self.idf))
+        query_tfidf_vec = np.zeros(len(query_idxs))
+        query_tfidf_vec_pos = np.zeros(len(query_idxs))
         for i in range(len(query_idxs)):
             feature = self.feat[query_idxs[i]]
-            query_tfidf_vec[query_idxs[i]] = query_tok_tfidf[feature]
+            query_tfidf_vec[i] = query_tok_tfidf[feature]
+            query_tfidf_vec_pos[i] = query_idxs[i]
         mag = np.sqrt(np.sum(query_tfidf_vec ** 2))
-        query_tfidf_vec = np.divide(query_tfidf_vec, mag, out=np.zeros(len(self.idf),
+        query_tfidf_vec = np.divide(query_tfidf_vec, mag, out=np.zeros(len(query_idxs),
             dtype=query_tfidf_vec.dtype), where=mag!=0)
-        query_tfidf_csr_vec = sparse.csr_matrix(query_tfidf_vec)
+        query_tfidf_csr_vec = sparse.csr_matrix((query_tfidf_vec, (np.zeros(len(query_idxs)), query_tfidf_vec_pos)),
+            shape=(1, len(self.idx_dict)))
         ranked_res = linear_kernel(query_tfidf_csr_vec, self.tfidf).flatten()
         sorted_idx_ranked_res = np.flip(np.argsort(ranked_res))[0:upper_limit:1]
         for i, idx in enumerate(sorted_idx_ranked_res):
