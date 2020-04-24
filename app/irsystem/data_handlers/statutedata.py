@@ -78,7 +78,7 @@ class StatuteData():
                 title = cur_pos['title']
                 id = self.cur_id
                 self.cur_id += 1
-                content = cleanText(removeHTML(cur_pos['text']))
+                content = removeHTML(cur_pos['text'])
                 self.temp_list.append((title, self.customClean(content), str(self.cur_id), 'TEXT'))
             elif 'items' in cur_pos:
                 self.recurseJSON(cur_pos['items'])
