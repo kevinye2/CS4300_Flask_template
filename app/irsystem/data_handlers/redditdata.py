@@ -102,14 +102,18 @@ class RedditData():
             reddit_file_path = os.path.join(self.DATA_ROOT, self.FOLDER_NAME, filename)
             reddit_file = json.load(open(reddit_file_path))
             # TODO
-        raise NotImplementedError
+            for k, submission in enumerate(reddit_file):
+                if 'selftext' not in submission:
+                    continue
+                ret.append((submission['title'], submission['selftext'], submission['id'], submission['full_link']))
+        return ret
 
     def getRedditList(self):
         '''
         Middle-man function that returns the correct reddit list
         '''
         # TODO: replace with return self.getRedditListFromFile()
-        return self.getRedditListFromAPI()
+        return self.getRedditListFromFile()
 
     def getRedditDict(self):
         '''
