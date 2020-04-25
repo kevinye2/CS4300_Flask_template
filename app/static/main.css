@@ -133,6 +133,14 @@ div.bottom_padding {
   width: 160px;
 }
 
+.btn_small {
+  background-color: #7AD615;
+  border: none;
+  height: 48px;
+  width: 128px;
+  margin-right: 10px;
+}
+
 /*
   Primary search input
 */

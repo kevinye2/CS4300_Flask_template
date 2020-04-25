@@ -141,6 +141,17 @@ function sendRelevanceFeedback(elem) {
     alert("Feedback already sent");
     return;
   }
+  if (elem.id.substring(0, 1) == '1') {
+    var temp_elem = document.getElementById('0' + elem.id.substring(1))
+    if (temp_elem !== null) {
+      temp_elem.setAttribute("style", "display: none");
+    }
+  } else {
+    var temp_elem = document.getElementById('1' + elem.id.substring(1))
+    if (temp_elem !== null) {
+      temp_elem.setAttribute("style", "display: none");
+    }
+  }
   var requester = new XMLHttpRequest();
   requester.open("POST", '/postfeedback', true);
   requester.setRequestHeader("Content-Type", "application/json");
@@ -148,16 +159,26 @@ function sendRelevanceFeedback(elem) {
     if (this.readyState == XMLHttpRequest.DONE && this.status === 200) {
       feedbacks_sent[elem.id] = true;
       feedbacks_failed[elem.id] = false;
-      document.getElementById(elem.id).innerHTML = "Feedback sent!";
+      if (elem.id.substring(0, 1) == '1') {
+        document.getElementById(elem.id).innerHTML = "Relevance sent!";
+      } else {
+        document.getElementById(elem.id).innerHTML = "Irrelevance sent!";
+      }
     } else {
       feedbacks_failed[elem.id] = true;
-      document.getElementById(elem.id).innerHTML = "Could not send, try again";
+      if (elem.id.substring(0, 1) == '1') {
+        document.getElementById(elem.id).innerHTML = "Relevance send failed";
+      } else {
+        document.getElementById(elem.id).innerHTML = "Irrelevance send failed";
+      }
     }
   }
   var request_json_obj = {
     query: query,
     county: county,
-    relevant_rating: [elem.id, parseInt(elem.dataset.rank)]
+    relevant_rating: [elem.dataset.category, elem.id.substring(1),
+      parseInt(elem.dataset.rank), elem.id.substring(0, 1) == '1'
+    ]
   };
   document.getElementById(elem.id).innerHTML = "Sending...";
   requester.send(JSON.stringify(request_json_obj));
@@ -285,20 +306,49 @@ function clearHTMLElement(id) {
 */
 function createIndividualResult(html_elem, id, link, title, content, rank) {
   var msg = "Relevant";
-  if (id in feedbacks_sent) {
-    msg = "Feedback sent!";
+  var msg2 = "Irrelevant";
+  var temp_id = '';
+  var condition_1 = '1' + id in feedbacks_sent || '0' + id in feedbacks_sent;
+  var condition_2 = '1' + id in feedbacks_failed && feedbacks_failed['1' + id];
+  var condition_3 = '0' + id in feedbacks_failed && feedbacks_failed['0' + id];
+  if (condition_1 || condition_2 || condition_3) {
+    if (condition_1) {
+      if ('1' + id in feedbacks_sent) {
+        msg = 'Relevance sent!';
+        temp_id = '1' + id;
+      } else {
+        msg = 'Irrelevance sent!';
+        temp_id = '0' + id;
+      }
+
+    } else if (condition_2) {
+      msg = 'Relevance send failed';
+      temp_id = '1' + id;
+    } else if (condition_3) {
+      msg = 'Irrelevance send failed';
+      temp_id = '0' + id;
+    }
+    html_elem.insertAdjacentHTML("beforeend",
+      '<div class="fixed_container"><span class="link_no_runon">' +
+      '<a target="_blank" href="' + link + '" rel="nofollow noopener noreferrer">' +
+      '</a></span><span class="no_runon"></span><br>' +
+      '<button class="btn_small btn-info" style="display: inline-block" id=' + temp_id +
+      ' onclick="sendRelevanceFeedback(this)" data-rank="' + rank.toString() +
+      '" data-category="' + html_elem.id + '" style="font-size: 11px">' + msg + '</button></div>'
+    );
+  } else {
+    html_elem.insertAdjacentHTML("beforeend",
+      '<div class="fixed_container"><span class="link_no_runon">' +
+      '<a target="_blank" href="' + link + '" rel="nofollow noopener noreferrer">' +
+      '</a></span><span class="no_runon"></span><br>' +
+      '<button class="btn_small btn-info" style="display: inline-block" id=' + '1' + id +
+      ' onclick="sendRelevanceFeedback(this)" data-rank="' + rank.toString() +
+      '" data-category="' + html_elem.id + '" style="font-size: 11px">Relevant</button>' +
+      '<button class="btn_small btn-info" style="display: inline-block" id=' + '0' + id +
+      ' onclick="sendRelevanceFeedback(this)" data-rank="' + rank.toString() +
+      '" data-category="' + html_elem.id + '" style="font-size: 11px">Irrelevant</button></div>'
+    );
   }
-  if (id in feedbacks_failed && feedbacks_failed[id]) {
-    msg = "Could not send, try again";
-  }
-  html_elem.insertAdjacentHTML("beforeend",
-    '<div class="fixed_container"><span class="link_no_runon">' +
-    '<a target="_blank" href="' + link + '" rel="nofollow noopener noreferrer">' +
-    '</a></span><span class="no_runon"></span><br>' +
-    '<button class="btn btn-info" id=' + id +
-    ' onclick="sendRelevanceFeedback(this)" data-rank="' + rank.toString() +
-    '" style="font-size: 11px">' + msg + '</button></div>'
-  );
 }
 
 /*

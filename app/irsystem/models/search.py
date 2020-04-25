@@ -84,8 +84,8 @@ def feedbackRatings(query, county, relevant_doc_id):
     parameters:
         query: original string query
         county: original county selection
-        relevant_doc_id: a [doc_id, ranking] 2 element list (basically a tuple)
-        deeemed relevant to query and county;
+        relevant_doc_id: a [doc_id, category, ranking, is_relevant] 4 element list (basically a tuple)
+        that indicates whether doc_id in category is relevant to query and county;
         ranking is the original ranking provided by the system for the
         document in regards to its category (statutes, cases, reddit posts) and
         is an integer 1...n
