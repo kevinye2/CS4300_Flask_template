@@ -51,41 +51,6 @@ class RedditData():
             ret[1].append(text_str)
         return ret
 
-    # TODO: Delete this function and replace with a fully implemented getRedditListFromFile()
-    def getRedditListFromAPI(self):
-        '''
-        This function is temporary and must be replaced in functionality by
-        getRedditListFromFile()
-
-        This function returns a list of reddit information after call(s)
-        to the reddit api
-        returns:
-            list of html-free tuples in the form of
-                [
-                    ('reddit title', 'description', 'id', 'url'),
-                    ...
-                ],
-        '''
-        reddit_base_url = 'https://www.reddit.com'
-        subreddits = ['CoronavirusNewYork', 'coronavirus', 'legaladvice']
-        all_reddit = []
-        # Using public-facing Reddit's API, with its own search ranking engine.
-        # (Not using PRAW, even with larger request size, though there are 'insignificant' rate limit.)
-        # TODO: Will probably want to use Pushshift for historic data eventually.
-        # headers = {'User-agent': 'redditRetrival'}, needed to uniquely identify to prevent rate limiting
-        for subreddit in subreddits:
-            r = requests.get('https://www.reddit.com/r/' + subreddit + '/search/.json?q=coronavirus&restrict_sr=1&limit=1000', headers={
-                'User-agent': 'redditRetrival'})
-            data = r.json()
-            for sub in data['data']['children']:
-                # TF-IDF ranking will eventually be performed on the feature vector of, title + body.
-                # Currently, posts can be links (ONLY having a url), or a body (i.e. a selftext).
-                # So submission.selftext could sometimes be empty (may need to filter?).
-                submission = sub['data']
-                all_reddit.append((submission['title'], "~Text~:" + submission['selftext'],
-                               str(submission['id']), reddit_base_url + submission['permalink']))
-        return all_reddit
-
     def getRedditListFromFile(self):
         '''
         This function returns a list of reddit information after scanning
@@ -96,12 +61,10 @@ class RedditData():
                     ...
                 ],
         '''
-        # TODO: take the reddit_file data, format it appropriately, and append it to ret, and return ret
         ret = []
         for filename in self.STATIC_DATA_PATH:
             reddit_file_path = os.path.join(self.DATA_ROOT, self.FOLDER_NAME, filename)
             reddit_file = json.load(open(reddit_file_path))
-            # TODO
             for k, submission in enumerate(reddit_file):
                 if 'selftext' not in submission:
                     continue
@@ -112,7 +75,6 @@ class RedditData():
         '''
         Middle-man function that returns the correct reddit list
         '''
-        # TODO: replace with return self.getRedditListFromFile()
         return self.getRedditListFromFile()
 
     def getRedditDict(self):
