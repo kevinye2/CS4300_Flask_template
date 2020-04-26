@@ -15,7 +15,11 @@ from app.irsystem.ranking_handlers.tfidffunc import TFIDFHolder
 cases_data = CaseData()
 statutes_data = StatuteData()
 reddit_data = RedditData()
-cases_rank_info = TFIDFHolder(cases_data.ids_cases_pair)
+cases_rank_info_holder = {}
+for county in cases_data.counties:
+    if cases_data.ids_cases_pair_holder[county] == ([], []):
+        continue
+    cases_rank_info_holder[county] = TFIDFHolder(cases_data.ids_cases_pair_holder[county])
 statutes_rank_info = TFIDFHolder(statutes_data.ids_statutes_pair)
 reddit_rank_info = TFIDFHolder(reddit_data.ids_reddit_pair)
 
@@ -49,7 +53,7 @@ def legalTipResp(query, county, upper_limit=100):
     '''
     resp_object = {}
 
-    cases_dict = cases_data.case_dict
+    cases_dict_holder = cases_data.case_dict_holder
     reddit_dict = reddit_data.reddit_dict
     statutes_dict = statutes_data.statute_dict
 
@@ -61,11 +65,12 @@ def legalTipResp(query, county, upper_limit=100):
         ret_reddit.append((content[0], content[1], doc_id, content[3]))
 
     # Getting TF-IDF matrices for cases
-    cases_rankings = cases_rank_info.getRankings(query)
+    cases_rankings = cases_rank_info_holder[county].getRankings(query) if county in cases_rank_info_holder else []
     ret_cases = []
     for doc_id in cases_rankings:
-        content = cases_dict[doc_id]
-        ret_cases.append((content[0], content[1], doc_id, content[3]))
+        content = cases_dict_holder[county][doc_id]
+        ret_cases.append((content[0], content[1][0:min(len(content[1]), 1500):1],
+            doc_id, content[3]))
 
     # Getting TF-IDF matrices for statutes
     statutes_rankings = statutes_rank_info.getRankings(query)
