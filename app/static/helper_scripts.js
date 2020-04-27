@@ -330,7 +330,7 @@ function createIndividualResult(html_elem, id, link, title, content, rank) {
     }
     html_elem.insertAdjacentHTML("beforeend",
       '<div class="fixed_container"><span class="link_no_runon">' +
-      '<a target="_blank" href="' + link + '" rel="nofollow noopener noreferrer">' +
+      '<a style="color: #2A27F8" target="_blank" href="' + link + '" rel="nofollow noopener noreferrer">' +
       '</a></span><span class="no_runon"></span><br>' +
       '<button class="btn_small btn-info" style="display: inline-block" id=' + temp_id +
       ' onclick="sendRelevanceFeedback(this)" data-rank="' + rank.toString() +

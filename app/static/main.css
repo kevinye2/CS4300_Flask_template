@@ -1,3 +1,8 @@
+body {
+  background-color: #DDE6F8;
+  font-family: 'Noto Sans HK', sans-serif;
+}
+
 /*
   ultimate_div is a protective container that prevents contents inside
   from being shifted upon window resize events
@@ -13,9 +18,8 @@ div.ultimate_div {
   Puts div in the center of its parent container
 */
 div.center_view {
-  background-color: #3552FF;
   margin: 0 auto;
-  padding: 0 20vw;
+  padding: 0 120px;
   text-align: left;
   width: 100%;
 }
@@ -35,7 +39,7 @@ div.page_click_area {
 div.middle_org {
   display: inline-block;
   margin: 0 auto;
-  padding: 0 20vw;
+  padding: 0 120px;
   text-align: left;
   width: 100%;
 }
@@ -44,8 +48,13 @@ div.middle_org {
   Container for legal, case, or reddit information
 */
 div.fixed_container {
+  background-color: white;
+  border-radius: 8px;
   overflow: hidden;
-  padding-bottom: 4.5em;
+  padding:32px;
+  margin-bottom: 16px;
+  width: 1040px;
+  box-shadow: 0px 2px 4px #CACACA;
 }
 
 /*
@@ -127,37 +136,59 @@ div.bottom_padding {
   Primary button for search and result type selection
 */
 .btn {
-  background-color: #7AD615;
+  background-size: 200% auto;
+  background-image: linear-gradient(to right, #2724FF 0%, #4445BA 51%, #3535db 100%);
   border: none;
+  color: white;
+  font-size: 16px;
   height: 64px;
   width: 160px;
 }
 
-.btn_small {
-  background-color: #7AD615;
-  border: none;
-  height: 48px;
-  width: 128px;
-  margin-right: 10px;
+.btn:hover {
+  background-position: right center;
+  color: white;
+  font-size: 16px;
 }
 
 /*
   Primary search input
 */
 input[type=text] {
-  border-radius: 8px 0 0 8px;
-  color: #3552FF;
+  border: 0;
+  border-radius: 4px;
+  color: #332648;
   font-size: 16px;
   height: 64px;
+  outline: none;
   padding-left: 16px;
   padding-right: 16px;
+  width: 640px;
+}
+
+/*
+  Primary search input placeholder
+*/
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: #9AAED7;
+  opacity: 1; /* Firefox */
+}
+
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+  color: #9AAED7;
+}
+
+::-ms-input-placeholder { /* Microsoft Edge */
+  color: #9AAED7;
 }
 
 /*
   Primary select input
 */
 select {
-  border-radius: 0 8px 8px 0;
+  border: 0;
+  border-radius: 4px;
+  color: #332648;
   font-size: 16px;
   height: 64px;
   padding-left: 16px;
@@ -168,21 +199,28 @@ select {
   Primary title header
 */
 h1 {
-  color: white;
+  color: #332648;
+  font-family: 'Noto Sans HK', sans-serif;
+  font-size: 72px;
+  font-weight: bold;
 }
 
 /*
   Results header
 */
 h2 {
-  color: #3552FF;
+  color: #332648;
+  font-size: 24px;
+  font-family: 'Noto Sans HK', sans-serif;
 }
 
 /*
   Primary subtitle header
 */
 h3 {
-  color: #B8C2FF;
+  color: #9AAED7;
+  font-family: 'Noto Sans HK', sans-serif;
+  font-weight: normal;
 }
 
 /*
@@ -192,3 +230,16 @@ h3 {
   padding-bottom: 2vh;
   padding-top: 10vh;
 }
+
+
+#query_form {
+  background-color: #CDDDFF;
+  margin-top: 32px;
+  padding: 32px;
+  width: 1040px;
+}
+
+
+
+
+
