@@ -11,23 +11,28 @@ from app.irsystem.data_handlers.redditdata import RedditData
 from app.irsystem.data_handlers.casedata import CaseData
 from app.irsystem.data_handlers.statutedata import StatuteData
 from app.irsystem.ranking_handlers.tfidffunc import TFIDFHolder
+from app.irsystem.ranking_handlers.logreg import LogReg
 
 cases_data = CaseData()
 statutes_data = StatuteData()
 reddit_data = RedditData()
-cases_rank_info_holder = {}
-for county in cases_data.counties:
-    if cases_data.ids_cases_pair_holder[county] == ([], []):
-        continue
-    cases_rank_info_holder[county] = TFIDFHolder(cases_data.ids_cases_pair_holder[county])
+cases_rank_info = TFIDFHolder(cases_data.ids_cases_pair)
 statutes_rank_info = TFIDFHolder(statutes_data.ids_statutes_pair)
 reddit_rank_info = TFIDFHolder(reddit_data.ids_reddit_pair)
+cases_log_reg = LogReg(cases_rank_info,
+    os.path.realpath('app/data/ml_data/case_log_reg.npz'),
+    os.path.realpath('app/data/ml_data/case_label.npz'))
+statutes_log_reg = LogReg(statutes_rank_info,
+    os.path.realpath('app/data/ml_data/statute_log_reg.npz'),
+    os.path.realpath('app/data/ml_data/statute_log_reg.npz'))
+reddit_log_reg = LogReg(reddit_rank_info,
+    os.path.realpath('app/data/ml_data/reddit_log_reg.npz'),
+    os.path.realpath('app/data/ml_data/reddit_log_reg.npz'))
 
-def legalTipResp(query, county, upper_limit=100):
+def legalTipResp(query, upper_limit=100):
     '''
     parameters:
         query: string describing user legal help request for COVID-19
-        county: string describing which county the user is in
     returns:
         dictionary in the form of
             {'legal_codes' : [
@@ -53,7 +58,7 @@ def legalTipResp(query, county, upper_limit=100):
     '''
     resp_object = {}
 
-    cases_dict_holder = cases_data.case_dict_holder
+    cases_dict = cases_data.case_dict
     reddit_dict = reddit_data.reddit_dict
     statutes_dict = statutes_data.statute_dict
 
@@ -65,10 +70,10 @@ def legalTipResp(query, county, upper_limit=100):
         ret_reddit.append((content[0], content[1], doc_id, content[3]))
 
     # Getting TF-IDF matrices for cases
-    cases_rankings = cases_rank_info_holder[county].getRankings(query) if county in cases_rank_info_holder else []
+    cases_rankings = cases_rank_info.getRankings(query)
     ret_cases = []
     for doc_id in cases_rankings:
-        content = cases_dict_holder[county][doc_id]
+        content = cases_dict[doc_id]
         ret_cases.append((content[0], content[1][0:min(len(content[1]), 1500):1],
             doc_id, content[3]))
 
@@ -84,16 +89,22 @@ def legalTipResp(query, county, upper_limit=100):
     resp_object['reddit_posts'] = ret_reddit
     return resp_object
 
-def feedbackRatings(query, county, relevant_doc_id):
+def feedbackRatings(query, relevant_doc_id):
     '''
     parameters:
         query: original string query
-        county: original county selection
-        relevant_doc_id: a [doc_id, category, ranking, is_relevant] 4 element list (basically a tuple)
-        that indicates whether doc_id in category is relevant to query and county;
+        relevant_doc_id: a [category, doc_id, ranking, is_relevant] 4 element list (basically a tuple)
+        that indicates whether doc_id in category is relevant to query;
         ranking is the original ranking provided by the system for the
         document in regards to its category (statutes, cases, reddit posts) and
         is an integer 1...n
     '''
-    ###Perform analysis on the relevancy rating###
-    return {'Great 1': relevant_doc_id[0], 'Great 2': relevant_doc_id[1]}
+    category = relevant_doc_id[0]
+    doc_id = relevant_doc_id[1]
+    label = 1 if relevant_doc_id[3] else -1
+    if category == 'cases_info':
+        cases_log_reg.addTraining(query, doc_id, label)
+    elif category == 'codes_info':
+        statutes_log_reg.addTraining(query, doc_id, label)
+    else:
+        reddit_log_reg.addTraining(query, doc_id, label)
