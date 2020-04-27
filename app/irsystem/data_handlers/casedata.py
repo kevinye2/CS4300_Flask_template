@@ -66,7 +66,7 @@ class CaseData():
                 case_file = json.load(open(case_file_path))
                 for elem in case_file:
                     ret.append((elem[0], elem[1],
-                        elem[2][0:min(3000, len(elem[2]))], elem[3]))
+                        elem[2][0:min(1500, len(elem[2]))], elem[3]))
         return ret
 
     def getCaseList(self):
