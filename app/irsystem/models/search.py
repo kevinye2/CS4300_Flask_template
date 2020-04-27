@@ -74,7 +74,7 @@ def legalTipResp(query, upper_limit=100):
     ret_cases = []
     for doc_id in cases_rankings:
         content = cases_dict[doc_id]
-        ret_cases.append((content[0], content[1][0:min(len(content[1]), 1500):1],
+        ret_cases.append((content[0], content[1][0:min(len(content[1]), 3000):1],
             doc_id, content[3]))
 
     # Getting TF-IDF matrices for statutes

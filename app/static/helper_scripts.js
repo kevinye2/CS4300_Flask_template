@@ -4,11 +4,6 @@
 var query;
 
 /*
-  Global variable for the input county
-*/
-var county;
-
-/*
   Maximum number of results shown per page
 */
 var results_per_page = 5;
@@ -46,7 +41,9 @@ var feedbacks_failed = {};
 /*
   Which category was chosen to display, either legal codes, cases, or reddit
 */
-var chosen_category = '';
+var chosen_category = 'reddit_info_container';
+
+var chosen_category_elem;
 
 /*
   The total number of pages for the code, case, and reddit categories
@@ -90,24 +87,15 @@ var results_ready = false;
   innerHTMLHandler is called, and data is constructed and displayed
 */
 function getLegalTips() {
-  query = document.getElementById("query_input").value.trim().toLowerCase();
+  query = document.getElementById("query_input").value
+  query = query.replace(/[^ 0-9a-z]+/gi, '')
+  query = query.trim().toLowerCase();
   query = query.split(" ").filter(function(c) {
     return c != "";
   }).join(" ");
-  if (!query.match(/^[ 0-9a-z]+$/)) {
-    alert("Please ensure query is alphanumeric");
-    return;
-  }
-  county = document.getElementById("county_selection").value.toLowerCase();
   var requester = new XMLHttpRequest();
-  if (county == "" || query == "") {
-    alert("Please input a valid legal query and county");
-    return;
-  } else if (query == "") {
+  if (query == "") {
     alert("Please input a valid legal query");
-    return;
-  } else if (county == "") {
-    alert("Please input a valid county");
     return;
   } else if (chosen_category == "") {
     alert("Please select a category");
@@ -115,7 +103,6 @@ function getLegalTips() {
   }
   request_json_obj = {
     query: query,
-    county: county
   };
   requester.open("POST", '/postquery', true);
   requester.setRequestHeader("Content-Type", "application/json");
@@ -124,9 +111,11 @@ function getLegalTips() {
       json_resp = JSON.parse(this.response);
       innerHTMLHandler(json_resp);
       document.getElementById("query_submit").innerHTML = "Search";
+      setCategory(chosen_category_elem !== undefined ? chosen_category_elem : document.getElementById("choose_reddit"));
     }
   }
   document.getElementById("results_area").setAttribute("style", "visibility: hidden");
+  document.getElementById("category_selection").setAttribute("style", "visibility: hidden");
   requester.send(JSON.stringify(request_json_obj));
   document.getElementById("query_submit").innerHTML = "Retrieving...";
   results_ready = false;
@@ -134,7 +123,7 @@ function getLegalTips() {
 
 /*
   Notifies corresponding http route that the document corresponding to elem
-  is relevant to the query and county input
+  is relevant to the query input
 */
 function sendRelevanceFeedback(elem) {
   if (elem.id in feedbacks_sent) {
@@ -160,22 +149,21 @@ function sendRelevanceFeedback(elem) {
       feedbacks_sent[elem.id] = true;
       feedbacks_failed[elem.id] = false;
       if (elem.id.substring(0, 1) == '1') {
-        document.getElementById(elem.id).innerHTML = "Relevance sent!";
+        document.getElementById(elem.id).innerHTML = "Like sent!";
       } else {
-        document.getElementById(elem.id).innerHTML = "Irrelevance sent!";
+        document.getElementById(elem.id).innerHTML = "Dislike sent!";
       }
     } else {
       feedbacks_failed[elem.id] = true;
       if (elem.id.substring(0, 1) == '1') {
-        document.getElementById(elem.id).innerHTML = "Relevance send failed";
+        document.getElementById(elem.id).innerHTML = "Like send failed";
       } else {
-        document.getElementById(elem.id).innerHTML = "Irrelevance send failed";
+        document.getElementById(elem.id).innerHTML = "Dislike send failed";
       }
     }
   }
   var request_json_obj = {
     query: query,
-    county: county,
     relevant_rating: [elem.dataset.category, elem.id.substring(1),
       parseInt(elem.dataset.rank), elem.id.substring(0, 1) == '1'
     ]
@@ -190,11 +178,12 @@ function sendRelevanceFeedback(elem) {
   category if possible.
 */
 function setCategory(elem) {
-  $("#choose_codes").attr("style", "background-color: #999");
-  $("#choose_cases").attr("style", "background-color: #999");
-  $("#choose_reddit").attr("style", "background-color: #999");
-  chosen_category = elem.dataset.category;
-  $("#" + elem.id).attr("style", "background-color: #38ca3f");
+  $("#choose_codes").attr("style", "background-color: inherit");
+  $("#choose_cases").attr("style", "background-color: inherit");
+  $("#choose_reddit").attr("style", "background-color: inherit");
+  chosen_category = elem !== undefined ? elem.dataset.category : "reddit_info_container";
+  chosen_category_elem = elem
+  $("#" + elem.id).attr("style", "background-color: blue; color: white");
   if (results_ready) {
     showResults();
     populateData();
@@ -252,6 +241,7 @@ function innerHTMLHandler(json_resp) {
       reddit[i][0], reddit[i][1], i + 1);
   }
   document.getElementById("results_area").setAttribute("style", "visibility: visible");
+  document.getElementById("category_selection").setAttribute("style", "visibility: visible");
   results_ready = true;
   showResults();
   populateData();
@@ -305,8 +295,8 @@ function clearHTMLElement(id) {
   Inserts the framework HTML to display the relevant data
 */
 function createIndividualResult(html_elem, id, link, title, content, rank) {
-  var msg = "Relevant";
-  var msg2 = "Irrelevant";
+  var msg = "Like";
+  var msg2 = "Dislike";
   var temp_id = '';
   var condition_1 = '1' + id in feedbacks_sent || '0' + id in feedbacks_sent;
   var condition_2 = '1' + id in feedbacks_failed && feedbacks_failed['1' + id];
@@ -314,25 +304,25 @@ function createIndividualResult(html_elem, id, link, title, content, rank) {
   if (condition_1 || condition_2 || condition_3) {
     if (condition_1) {
       if ('1' + id in feedbacks_sent) {
-        msg = 'Relevance sent!';
+        msg = 'Like sent!';
         temp_id = '1' + id;
       } else {
-        msg = 'Irrelevance sent!';
+        msg = 'Dislike sent!';
         temp_id = '0' + id;
       }
 
     } else if (condition_2) {
-      msg = 'Relevance send failed';
+      msg = 'Like send failed';
       temp_id = '1' + id;
     } else if (condition_3) {
-      msg = 'Irrelevance send failed';
+      msg = 'Dislike send failed';
       temp_id = '0' + id;
     }
     html_elem.insertAdjacentHTML("beforeend",
       '<div class="fixed_container"><span class="link_no_runon">' +
       '<a style="color: #2A27F8" target="_blank" href="' + link + '" rel="nofollow noopener noreferrer">' +
       '</a></span><span class="no_runon"></span><br>' +
-      '<button class="btn_small btn-info" style="display: inline-block" id=' + temp_id +
+      '<button class="transparent_button_small" style="display: inline-block" id=' + temp_id +
       ' onclick="sendRelevanceFeedback(this)" data-rank="' + rank.toString() +
       '" data-category="' + html_elem.id + '" style="font-size: 11px">' + msg + '</button></div>'
     );
@@ -341,12 +331,12 @@ function createIndividualResult(html_elem, id, link, title, content, rank) {
       '<div class="fixed_container"><span class="link_no_runon">' +
       '<a target="_blank" href="' + link + '" rel="nofollow noopener noreferrer">' +
       '</a></span><span class="no_runon"></span><br>' +
-      '<button class="btn_small btn-info" style="display: inline-block" id=' + '1' + id +
+      '<button class="transparent_button_small" style="display: inline-block" id=' + '1' + id +
       ' onclick="sendRelevanceFeedback(this)" data-rank="' + rank.toString() +
-      '" data-category="' + html_elem.id + '" style="font-size: 11px">Relevant</button>' +
-      '<button class="btn_small btn-info" style="display: inline-block" id=' + '0' + id +
+      '" data-category="' + html_elem.id + '" style="font-size: 11px">Like</button>' +
+      '<button class="transparent_button_small" style="display: inline-block" id=' + '0' + id +
       ' onclick="sendRelevanceFeedback(this)" data-rank="' + rank.toString() +
-      '" data-category="' + html_elem.id + '" style="font-size: 11px">Irrelevant</button></div>'
+      '" data-category="' + html_elem.id + '" style="font-size: 11px">Dislike</button></div>'
     );
   }
 }
@@ -415,6 +405,7 @@ function handlePageClick(sel) {
     data = reddit;
   }
   document.getElementById("results_area").setAttribute("style", "visibility: hidden");
+  document.getElementById("category_selection").setAttribute("style", "visibility: hidden");
   clearHTMLElement(sel.dataset.infoclass + "_page_click");
   pageChange(document.getElementById(sel.dataset.infoclass),
     sel.dataset.infoclass, data, sel.dataset.pagenum);
@@ -422,6 +413,7 @@ function handlePageClick(sel) {
   createPageClickRange(document.getElementById(sel.dataset.infoclass + "_page_click"),
     sel.dataset.infoclass, new_start, total_pages[sel.dataset.infoclass]);
   document.getElementById("results_area").setAttribute("style", "visibility: visible");
+  document.getElementById("category_selection").setAttribute("style", "visibility: visible");
 }
 
 /*

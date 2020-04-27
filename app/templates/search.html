@@ -35,102 +35,22 @@ so any removal or modification may cause errors and unexpected behavior -->
                 case, or reddit
       -->
       <h1>Know your rights.</h1>
-      <div style="width: 640px">
+      <div style="width: inherit">
         <h3>COVID is affecting everyone in unique ways, but one thing unites us all – our rights.</h3>
         <h3 style="color: #4445BA">We're here to help.</h3>
       </div>
+      <h5><a style="color: white" target="_blank" rel="nofollow noopener noreferrer" href="https://legal-pro-tips.herokuapp.com">Open prototype 1</a></h5>
       <form id="query_form">
         <!-- The custom CSS allows the query_input and county_selection to have
           equivalent vertical height and alignment, although imported themes
           may have different alignments. Potentially utilize jquery to manually
           set element height and alignment if necessary -->
-          <input class="middle_vert_align" type="text" id="query_input" name="query_input2" placeholder="What can we help you with?">
+        <input class="middle_vert_align" type="text" id="query_input" name="query_input2" placeholder="What can we help you with?">
         </input>
-        <select class="increase_padding middle_vert_align" id="county_selection" name="county_selection" placeholder="Select county">
-          <option selected value="NYS">All counties</option>
-          <option value="Albany">Albany</option>
-          <option value="Allegany">Allegany</option>
-          <option value="Bronx">Bronx</option>
-          <option value="Broome">Broome</option>
-          <option value="Cattaraugus">Cattaraugus</option>
-          <option value="Cayuga">Cayuga</option>
-          <option value="Chautauqua">Chautauqua</option>
-          <option value="Chemung">Chemung</option>
-          <option value="Chenango">Chenango</option>
-          <option value="Clinton">Clinton</option>
-          <option value="Columbia">Columbia</option>
-          <option value="Cortland">Cortland</option>
-          <option value="Delaware">Delaware</option>
-          <option value="Dutchess">Dutchess</option>
-          <option value="Erie">Erie</option>
-          <option value="Essex">Essex</option>
-          <option value="Franklin">Franklin</option>
-          <option value="Fulton">Fulton</option>
-          <option value="Genesee">Genesee</option>
-          <option value="Greene">Greene</option>
-          <option value="Hamilton">Hamilton</option>
-          <option value="Herkimer">Herkimer</option>
-          <option value="Jefferson">Jefferson</option>
-          <option value="Kings">Kings</option>
-          <option value="Lewis">Lewis</option>
-          <option value="Livingston">Livingston</option>
-          <option value="Madison">Madison</option>
-          <option value="Monroe">Monroe</option>
-          <option value="Montgomery">Montgomery</option>
-          <option value="Nassau">Nassau</option>
-          <option value="New York">New York</option>
-          <option value="Niagara">Niagara</option>
-          <option value="Oneida">Oneida</option>
-          <option value="Onondaga">Onondaga</option>
-          <option value="Ontario">Ontario</option>
-          <option value="Orange">Orange</option>
-          <option value="Orleans">Orleans</option>
-          <option value="Oswego">Oswego</option>
-          <option value="Ostego">Ostego</option>
-          <option value="Putnam">Putnam</option>
-          <option value="Queens">Queens</option>
-          <option value="Rensselaer">Rensselaer</option>
-          <option value="Richmond">Richmond</option>
-          <option value="Rockland">Rockland</option>
-          <option value="Saratoga">Saratoga</option>
-          <option value="Schenectady">Schenectady</option>
-          <option value="Schoharie">Schoharie</option>
-          <option value="Schuyler">Schuyler</option>
-          <option value="Seneca">Seneca</option>
-          <option value="St. Lawrence">St. Lawrence</option>
-          <option value="Steuben">Steuben</option>
-          <option value="Suffolk">Suffolk</option>
-          <option value="Sullivan">Sullivan</option>
-          <option value="Tioga">Tioga</option>
-          <option value="Tompkins">Tompkins</option>
-          <option value="Ulster">Ulster</option>
-          <option value="Warren">Warren</option>
-          <option value="Washington">Washington</option>
-          <option value="Wayne">Wayne</option>
-          <option value="Westchester">Westchester</option>
-          <option value="Wyoming">Wyoming</option>
-          <option value="Yates">Yates</option>
-        </select>
-        <button type="button" class="btn btn-1" id="query_submit" onclick="getLegalTips()">
+        <button type="button" class="search_btn" id="query_submit" onclick="getLegalTips()">
           Search
         </button>
-        <!-- The colors of each button within category_selection are controlled
-          by jquery code within helper_scripts.js; if buttons are replaced by
-          some other element, event listeners and id must be kept-->
-          <div class="increase_padding" id="category_selection">
-            <button type="button" class="btn btn-info" style="background-color: #999" id="choose_codes" data-category="codes_info_container" onclick="setCategory(this)">
-              Legal statutes
-            </button>
-            <button type="button" class="btn btn-info" style="background-color: #999" id="choose_cases" data-category="cases_info_container" onclick="setCategory(this)">
-              Legal cases
-            </button>
-            <button type="button" class="btn btn-info" style="background-color: #999" id="choose_reddit" data-category="reddit_info_container" onclick="setCategory(this)">
-              Reddit
-            </button>
-          </div>
-        </form>
-        <h5><a style="color: white" target="_blank"
-          rel="nofollow noopener noreferrer" href="https://legal-pro-tips.herokuapp.com">Open prototype 1</a></h5>
+      </form>
     </div>
     <!-- There are 3 primary div elements in results_area:
             codes_info_container holds all elements relevant to displaying
@@ -139,8 +59,23 @@ so any removal or modification may cause errors and unexpected behavior -->
               structured identically
     -->
     <div id="results_area" class="bottom_padding">
+      <!-- The colors of each button within category_selection are controlled
+                by jquery code within helper_scripts.js; if buttons are replaced by
+                some other element, event listeners and id must be kept-->
+      <div class="increase_padding left_right_padding" id="category_selection" style="visibility: hidden">
+        <h2 style="font-weight: bold">Results</h2>
+        <h5 style="display: inline-block">Filter results by type:</h5>
+        <button type="button" class="transparent_button" id="choose_codes" data-category="codes_info_container" onclick="setCategory(this)">
+          Legal statutes
+        </button>
+        <button type="button" class="transparent_button" id="choose_cases" data-category="cases_info_container" onclick="setCategory(this)">
+          Legal cases
+        </button>
+        <button type="button" class="transparent_button" id="choose_reddit" data-category="reddit_info_container" onclick="setCategory(this)">
+          Reddit
+        </button>
+      </div>
       <div class="middle_org" id="codes_info_container" style="display: none">
-        <h2>Legal statutes</h2>
         <!-- The elements in codes_info_container are identical in purpose
               and structure to the other containers below.
             codes_info contains the actual text resulst for legal info, and
@@ -154,14 +89,12 @@ so any removal or modification may cause errors and unexpected behavior -->
         </div>
       </div>
       <div class="middle_org" id="cases_info_container" style="display: none">
-        <h2>Results - Legal cases</h2>
         <div class="left_shift_text" id="cases_info"></div>
         <div class="page_click_area">
           <span class="increase_padding" id="cases_info_page_click"></span>
         </div>
       </div>
       <div class="middle_org" id="reddit_info_container" style="display: none">
-        <h2 style="color: #FF4301">Results - Reddit</h2>
         <div class="left_shift_text" id="reddit_info"></div>
         <div class="page_click_area">
           <span class="increase_padding" id="reddit_info_page_click"></span>
