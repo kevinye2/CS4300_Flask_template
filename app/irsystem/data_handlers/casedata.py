@@ -64,9 +64,7 @@ class CaseData():
             case_file_path = os.path.join(self.DATA_ROOT, self.FOLDER_NAME, filename)
             if '.json' in filename:
                 case_file = json.load(open(case_file_path))
-                for elem in case_file:
-                    ret.append((elem[0], elem[1],
-                        elem[2][0:min(1500, len(elem[2]))], elem[3]))
+                ret.extend(case_file)
         return ret
 
     def getCaseList(self):
