@@ -2,6 +2,7 @@
 
 <head>
   <title>Legal ProTips</title>
+  <link href="https://fonts.googleapis.com/css?family=Noto+Sans+HK&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/bootstrap.min.css">
   <link rel="stylesheet" href="/static/main.css">
   <script src="/static/helper_scripts.js"></script>
@@ -34,18 +35,19 @@ so any removal or modification may cause errors and unexpected behavior -->
                 case, or reddit
       -->
       <h1>Know your rights.</h1>
-      <h3>COVID is affecting everyone in unique ways, but one thing unites us all – our rights. We’re here to help.</h3>
-      <h5><a style="color: white" target="_blank"
-        rel="nofollow noopener noreferrer" href="https://legal-pro-tips.herokuapp.com">Open prototype 1</a></h5>
+      <div style="width: 640px">
+        <h3>COVID is affecting everyone in unique ways, but one thing unites us all – our rights.</h3>
+        <h3 style="color: #4445BA">We're here to help.</h3>
+      </div>
       <form id="query_form">
         <!-- The custom CSS allows the query_input and county_selection to have
-        equivalent vertical height and alignment, although imported themes
-        may have different alignments. Potentially utilize jquery to manually
-        set element height and alignment if necessary -->
-        <input class="increase_margins middle_vert_align" type="text" id="query_input" name="query_input2" placeholder="My landlord is demanding rent…">
+          equivalent vertical height and alignment, although imported themes
+          may have different alignments. Potentially utilize jquery to manually
+          set element height and alignment if necessary -->
+          <input class="middle_vert_align" type="text" id="query_input" name="query_input2" placeholder="What can we help you with?">
         </input>
         <select class="increase_padding middle_vert_align" id="county_selection" name="county_selection" placeholder="Select county">
-          <option selected value="NYS">All of New York</option>
+          <option selected value="NYS">All counties</option>
           <option value="Albany">Albany</option>
           <option value="Allegany">Allegany</option>
           <option value="Bronx">Bronx</option>
@@ -109,24 +111,26 @@ so any removal or modification may cause errors and unexpected behavior -->
           <option value="Wyoming">Wyoming</option>
           <option value="Yates">Yates</option>
         </select>
-        <button type="button" class="btn btn-info" id="query_submit" onclick="getLegalTips()">
+        <button type="button" class="btn btn-1" id="query_submit" onclick="getLegalTips()">
           Search
         </button>
         <!-- The colors of each button within category_selection are controlled
-        by jquery code within helper_scripts.js; if buttons are replaced by
-        some other element, event listeners and id must be kept-->
-        <div class="increase_padding" id="category_selection">
-          <button type="button" class="btn btn-info" style="background-color: #999" id="choose_codes" data-category="codes_info_container" onclick="setCategory(this)">
-            Legal statutes
-          </button>
-          <button type="button" class="btn btn-info" style="background-color: #999" id="choose_cases" data-category="cases_info_container" onclick="setCategory(this)">
-            Legal cases
-          </button>
-          <button type="button" class="btn btn-info" style="background-color: #999" id="choose_reddit" data-category="reddit_info_container" onclick="setCategory(this)">
-            Reddit
-          </button>
-        </div>
-      </form>
+          by jquery code within helper_scripts.js; if buttons are replaced by
+          some other element, event listeners and id must be kept-->
+          <div class="increase_padding" id="category_selection">
+            <button type="button" class="btn btn-info" style="background-color: #999" id="choose_codes" data-category="codes_info_container" onclick="setCategory(this)">
+              Legal statutes
+            </button>
+            <button type="button" class="btn btn-info" style="background-color: #999" id="choose_cases" data-category="cases_info_container" onclick="setCategory(this)">
+              Legal cases
+            </button>
+            <button type="button" class="btn btn-info" style="background-color: #999" id="choose_reddit" data-category="reddit_info_container" onclick="setCategory(this)">
+              Reddit
+            </button>
+          </div>
+        </form>
+        <h5><a style="color: white" target="_blank"
+          rel="nofollow noopener noreferrer" href="https://legal-pro-tips.herokuapp.com">Open prototype 1</a></h5>
     </div>
     <!-- There are 3 primary div elements in results_area:
             codes_info_container holds all elements relevant to displaying
@@ -150,14 +154,14 @@ so any removal or modification may cause errors and unexpected behavior -->
         </div>
       </div>
       <div class="middle_org" id="cases_info_container" style="display: none">
-        <h2>Legal cases</h2>
+        <h2>Results - Legal cases</h2>
         <div class="left_shift_text" id="cases_info"></div>
         <div class="page_click_area">
           <span class="increase_padding" id="cases_info_page_click"></span>
         </div>
       </div>
       <div class="middle_org" id="reddit_info_container" style="display: none">
-        <h2 style="color: #FF4301">Reddit</h2>
+        <h2 style="color: #FF4301">Results - Reddit</h2>
         <div class="left_shift_text" id="reddit_info"></div>
         <div class="page_click_area">
           <span class="increase_padding" id="reddit_info_page_click"></span>
