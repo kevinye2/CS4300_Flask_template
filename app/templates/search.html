@@ -10,16 +10,19 @@
   <script>
     $(document).ready(function() {
       $("#ultimate_div").css("width", window.screen.width);
-      // $("#ultimate_div").css("padding-top", window.screen.width * 0.05);
-      // $("#ultimate_div").css("padding-left", window.screen.width * 0.05);
-      // $("#ultimate_div").css("padding-right", window.screen.width * 0.05);
+      $(document).keyup(function(event) {
+        if (event.keyCode == 13) {
+          event.preventDefault();
+          getLegalTips();
+        }
+      });
     });
   </script>
 </head>
 <!-- The id and attributes of all elements are tightly coupled with helper_scripts.js,
 so any removal or modification may cause errors and unexpected behavior -->
 
-<body>
+<body id="clickable_body">
   <!-- ultimate_div prevents the elements contained within from being shifted
   around during window resize events -->
   <div id="ultimate_div" class="ultimate_div">
@@ -40,7 +43,7 @@ so any removal or modification may cause errors and unexpected behavior -->
         <h3 style="color: #4445BA">We're here to help.</h3>
       </div>
       <h5><a style="color: white" target="_blank" rel="nofollow noopener noreferrer" href="https://legal-pro-tips.herokuapp.com">Open prototype 1</a></h5>
-      <form id="query_form">
+      <form id="query_form" method="dialog">
         <!-- The custom CSS allows the query_input and county_selection to have
           equivalent vertical height and alignment, although imported themes
           may have different alignments. Potentially utilize jquery to manually

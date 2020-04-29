@@ -19,14 +19,29 @@ var max_page_options = 10;
 var codes = {};
 
 /*
+  Dictionary holding all the legal code stop words
+*/
+var codes_stop_words = {};
+
+/*
   Dictionary holding all the legal cases json
 */
 var cases = {};
 
 /*
+  Dictionary holding all the legal cases stop words
+*/
+var cases_stop_words = {};
+
+/*
   Dictionary holding all the reddit json
 */
 var reddit = {};
+
+/*
+  Dictionary holding all the reddit stop words
+*/
+var reddit_stop_words = {};
 
 /*
   Dictionary identifying which documents had feedback sent successfully
@@ -216,6 +231,9 @@ function innerHTMLHandler(json_resp) {
   codes = json_resp.legal_codes;
   cases = json_resp.legal_cases;
   reddit = json_resp.reddit_posts;
+  codes_stop_words = json_resp.stop_words.statutes;
+  cases_stop_words = json_resp.stop_words.cases;
+  reddit_stop_words = json_resp.stop_words.reddit;
   var codes_elem = document.getElementById("codes_info");
   var cases_elem = document.getElementById("cases_info");
   var reddit_elem = document.getElementById("reddit_info");
@@ -457,9 +475,9 @@ function handleEllipsis(id, idxs, info_holder) {
       var cur_a;
       if (cur_span.find("a").length > 0) {
         var cur_a = $(cur_span.find("a").get(0));
-        cleaveText(cur_span, cur_a, max_height, clean_title, false);
+        cleaveText(cur_span, cur_a, max_height, clean_title, false, id);
       } else {
-        cleaveText(cur_span, cur_span, max_height, clean_content, true);
+        cleaveText(cur_span, cur_span, max_height, clean_content, true, id);
       }
     });
     pos++;
@@ -470,7 +488,7 @@ function handleEllipsis(id, idxs, info_holder) {
   Truncates text to fit within its div, places ellipses at the end, and "bolds"
   relevant query terms within the description text
 */
-function cleaveText(outer_wrap, inner_wrap, max_height, words, is_content) {
+function cleaveText(outer_wrap, inner_wrap, max_height, words, is_content, id) {
   var temp = ""
   var all_html = words.split(" ");
   inner_wrap.html("");
@@ -494,7 +512,7 @@ function cleaveText(outer_wrap, inner_wrap, max_height, words, is_content) {
     var poss_strs = query.split(" ");
     for (var x = 0; x < poss_strs.length; x++) {
       var poss_str = poss_strs[x];
-      if (badString(poss_str)) {
+      if (badString(poss_str) || stopWord(poss_str, id)) {
         continue;
       }
       if (poss_str.length >= 3) {
@@ -513,4 +531,19 @@ function cleaveText(outer_wrap, inner_wrap, max_height, words, is_content) {
 function badString(str) {
   return str == 'br' || str == 'nbsp' || str == 'span' || str == 'style' ||
     str == 'text' || str == 'shadow' || str == '1px';
+}
+
+/*
+  Determines if a string is a stop word for its category of text
+*/
+function stopWord(poss_str, id) {
+  stop_words = {};
+  if (id == "codes_info") {
+    stop_words = codes_stop_words;
+  } else if (id == "reddit_info") {
+    stop_words = reddit_stop_words;
+  } else if (id == "cases_info") {
+    stop_words = cases_stop_words;
+  }
+  return poss_str in stop_words;
 }

@@ -21,6 +21,7 @@ class TFIDFHolder():
         self.feat = temp[1]
         self.idf = temp[2]
         self.term_idx_dict = temp[3]
+        self.stop_words = temp[4]
 
     def vectorizeQuery(self, query):
         '''
@@ -63,15 +64,21 @@ class TFIDFHolder():
         Parameters:
             docs: list of strings, where each string is a complete document
         Returns:
-            tuple of (TF-IDF matrix, list of feature names, idf array, and dictionary of feature indexes)
+            tuple of (TF-IDF matrix, list of feature names, idf array, dictionary of feature indexes, and dictionary of stop words)
         '''
-        tf = TfidfVectorizer(max_df=0.95)
+        tf = TfidfVectorizer(max_df=0.50)
         tfidf_matrix = tf.fit_transform(docs)
         feature_names = tf.get_feature_names()
         feature_idx_dict = {}
         for idx, elem in enumerate(feature_names):
             feature_idx_dict[elem] = idx
-        return tfidf_matrix, feature_names, tf.idf_, feature_idx_dict
+        return tfidf_matrix, feature_names, tf.idf_, feature_idx_dict, self.turnToDict(tf.stop_words_)
+
+    def turnToDict(self, stop_words):
+        ret = {}
+        for word in stop_words:
+            ret[word] = True
+        return ret
 
     def getRankings(self, query, upper_limit=100):
         '''

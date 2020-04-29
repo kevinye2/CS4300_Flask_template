@@ -88,6 +88,11 @@ def legalTipResp(query, upper_limit=100):
     resp_object['legal_codes'] = ret_statutes
     resp_object['legal_cases'] = ret_cases
     resp_object['reddit_posts'] = ret_reddit
+    resp_object['stop_words'] = {
+        'statutes': statutes_rank_info.stop_words,
+        'cases': cases_rank_info.stop_words,
+        'reddit': reddit_rank_info.stop_words
+    }
     return resp_object
 
 def feedbackRatings(query, relevant_doc_id):
