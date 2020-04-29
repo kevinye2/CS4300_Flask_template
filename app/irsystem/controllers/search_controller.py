@@ -15,7 +15,8 @@ def initializeTemplate():
 def handleQuery():
 	with mutex:
 		query = request.json.get('query')
-		resp_obj = legalTipResp(query)
+		max_res = request.json.get('limit') if not request.json.get('limit') is None else 50
+		resp_obj = legalTipResp(query, max_res)
 		return Response(response=json.dumps(resp_obj), status=200,
 			content_type='application/json')
 

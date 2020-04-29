@@ -73,7 +73,7 @@ class TFIDFHolder():
             feature_idx_dict[elem] = idx
         return tfidf_matrix, feature_names, tf.idf_, feature_idx_dict
 
-    def getRankings(self, query, county='', upper_limit=100):
+    def getRankings(self, query, upper_limit=100):
         '''
         Compute resulting ranking cosine similarity between the query and corpus of docs represented
         by the TF-IDF matrix.
@@ -89,13 +89,9 @@ class TFIDFHolder():
             self.term_idx_dict: Dictionary of key: query, value: corresponding index
             in idf_array and feature_names
             upper_limit: maximum relevant results to be returned
-            county: Optional input for case category
         returns:
             Sorted (ranked) list of doc_id, most relevant first
         '''
-        if county!='':
-            # DO SOMETHING
-            pass
         query_tok_tfidf = {}
         query_split = query.split()
         query_idxs = []

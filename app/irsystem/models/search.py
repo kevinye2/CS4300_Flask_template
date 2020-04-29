@@ -56,6 +56,7 @@ def legalTipResp(query, upper_limit=100):
         All results should be ranked in the list, where the most relevant occurs
         first
     '''
+    upper_limit = min(upper_limit, 100)
     resp_object = {}
 
     cases_dict = cases_data.case_dict
@@ -63,14 +64,14 @@ def legalTipResp(query, upper_limit=100):
     statutes_dict = statutes_data.statute_dict
 
     # Getting TF-IDF matrices for reddit
-    reddit_rankings = reddit_rank_info.getRankings(query)
+    reddit_rankings = reddit_rank_info.getRankings(query, upper_limit)
     ret_reddit = []
     for doc_id in reddit_rankings:
         content = reddit_dict[doc_id]
         ret_reddit.append((content[0], content[1], doc_id, content[3]))
 
     # Getting TF-IDF matrices for cases
-    cases_rankings = cases_rank_info.getRankings(query)
+    cases_rankings = cases_rank_info.getRankings(query, upper_limit)
     ret_cases = []
     for doc_id in cases_rankings:
         content = cases_dict[doc_id]
@@ -78,7 +79,7 @@ def legalTipResp(query, upper_limit=100):
             doc_id, content[3]))
 
     # Getting TF-IDF matrices for statutes
-    statutes_rankings = statutes_rank_info.getRankings(query)
+    statutes_rankings = statutes_rank_info.getRankings(query, upper_limit)
     ret_statutes = []
     for doc_id in statutes_rankings:
         content = statutes_dict[doc_id]
