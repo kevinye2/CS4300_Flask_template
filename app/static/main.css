@@ -86,7 +86,7 @@ div.bottom_padding {
   Shifts all inner text left
 */
 .left_shift_text {
-  padding-top: 2vh;
+  padding-top: 20px;
   text-align: left;
 }
 
@@ -225,8 +225,13 @@ h3 {
   Container for search form
 */
 #search_area {
-  padding-bottom: 2vh;
-  padding-top: 10vh;
+  padding-bottom: 0px;
+  padding-top: 0px;
+}
+
+.input_filters_area {
+  padding-top: 20px;
+  display: block;
 }
 
 

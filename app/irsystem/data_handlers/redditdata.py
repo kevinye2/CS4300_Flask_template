@@ -55,7 +55,7 @@ class RedditData():
         This function returns a dict of reddit information after scanning
         where the reddit data json is located (static jsons must be created first):
         {
-            id: ('reddit title', 'description', 'id', 'url'),
+            id: ('reddit title', 'description', 'id', 'url', 'created_utc'),
             ...
         }
         '''
@@ -68,7 +68,10 @@ class RedditData():
                     continue
                 str_id = str(submission['id'])
                 ret[str_id] = ((submission['title'],
-                    submission['selftext'], str_id, submission['full_link']))
+                    submission['selftext'],
+                    str_id,
+                    submission['full_link'],
+                    submission['created_utc']))
         return ret
 
     def getRedditDict(self):

@@ -15,8 +15,15 @@ def initializeTemplate():
 def handleQuery():
 	with mutex:
 		query = request.json.get('query')
-		max_res = request.json.get('limit') if not request.json.get('limit') is None else 50
-		resp_obj = legalTipResp(query, max_res)
+		max_res = int(request.json.get('max_res')) if not request.json.get('max_res') is None else 50
+		reddit_range_utc = request.json.get('reddit_range_utc')
+		if not reddit_range_utc is None:
+			reddit_range_utc[0] = int(reddit_range_utc[0])
+			reddit_range_utc[1] = int(reddit_range_utc[1])
+		else:
+			reddit_range_utc = [0, 2 * (10**9)]
+		ml_on= request.json.get('ml_on') if not request.json.get('ml_on') is None else False
+		resp_obj = legalTipResp(query, max_res, reddit_range_utc, ml_on)
 		return Response(response=json.dumps(resp_obj), status=200,
 			content_type='application/json')
 

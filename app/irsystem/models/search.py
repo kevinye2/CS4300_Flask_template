@@ -13,6 +13,10 @@ from app.irsystem.data_handlers.statutedata import StatuteData
 from app.irsystem.ranking_handlers.tfidffunc import TFIDFHolder
 from app.irsystem.ranking_handlers.logreg import LogReg
 
+try:
+    requests.get('https://legal-pro-tips-wait.herokuapp.com')
+except Exception:
+    pass
 cases_data = CaseData()
 statutes_data = StatuteData()
 reddit_data = RedditData()
@@ -29,7 +33,7 @@ reddit_log_reg = LogReg(reddit_rank_info,
     os.path.realpath('app/data/ml_data/reddit_log_reg.npz'),
     os.path.realpath('app/data/ml_data/reddit_log_reg.npz'))
 
-def legalTipResp(query, upper_limit=100):
+def legalTipResp(query, upper_limit=100, reddit_range_utc=[0, 2 * (10**9)], ml_on=False):
     '''
     parameters:
         query: string describing user legal help request for COVID-19
@@ -68,7 +72,8 @@ def legalTipResp(query, upper_limit=100):
     ret_reddit = []
     for doc_id in reddit_rankings:
         content = reddit_dict[doc_id]
-        ret_reddit.append((content[0], content[1], doc_id, content[3]))
+        if content[4] >= reddit_range_utc[0] and content[4] <= reddit_range_utc[1]:
+            ret_reddit.append((content[0], content[1], doc_id, content[3]))
 
     # Getting TF-IDF matrices for cases
     cases_rankings = cases_rank_info.getRankings(query, upper_limit)

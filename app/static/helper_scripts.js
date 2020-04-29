@@ -118,6 +118,8 @@ function getLegalTips() {
   }
   request_json_obj = {
     query: query,
+    reddit_range_utc: $("#reddit_date_range").slider("option", "values"),
+    max_res: $("#num_res_range").slider("option", "value")
   };
   requester.open("POST", '/postquery', true);
   requester.setRequestHeader("Content-Type", "application/json");

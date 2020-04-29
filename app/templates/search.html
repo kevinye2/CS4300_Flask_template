@@ -3,10 +3,12 @@
 <head>
   <title>Legal ProTips</title>
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+HK&display=swap" rel="stylesheet">
+  <link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
   <link rel="stylesheet" href="/static/bootstrap.min.css">
   <link rel="stylesheet" href="/static/main.css">
   <script src="/static/helper_scripts.js"></script>
-  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha256-pasqAKBDmFT4eHoN2ndd6lN370kFiGUFyTiUHWhU7k8=" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.5.0.min.js" integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ=" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
   <script>
     $(document).ready(function() {
       $("#ultimate_div").css("width", window.screen.width);
@@ -15,6 +17,39 @@
           event.preventDefault();
           getLegalTips();
         }
+      });
+      $(function() {
+        $("#reddit_date_range").slider({
+          range: true,
+          min: new Date("2019-12-01").getTime() / 1000,
+          max: new Date("2020-04-19").getTime() / 1000,
+          step: 86400,
+          values: [new Date("2019-12-01").getTime() / 1000, new Date("2020-04-19").getTime() / 1000],
+          slide: function(event, date_val) {
+            $("#date_range_disp").text(new Date(date_val.values[0] * 1000).toDateString() + ' to ' +
+              new Date(date_val.values[1] * 1000).toDateString());
+          }
+        });
+        $("#num_res_range").slider({
+          min: 5,
+          max: 100,
+          step: 1,
+          value: 5,
+          slide: function(event, val) {
+            $("#num_res_range_disp").text(val.value);
+          }
+        });
+        $("#date_range_disp").text(new Date("2019-12-01").toDateString() + ' to ' +
+          new Date("2020-04-19").toDateString());
+        $("#num_res_range_disp").text(5);
+        $("#reddit_date_range .ui-state-default").css("background-size", "200%");
+        $("#reddit_date_range .ui-state-default").css("border", "1px blue");
+        $("#reddit_date_range .ui-state-default").css("background-image", "linear-gradient(to right, #2724FF 0%, #4445BA 51%, #3535db 100%)");
+        $("#reddit_date_range .ui-widget-header").css("background", "white");
+        $("#num_res_range .ui-state-default").css("background-size", "200%");
+        $("#num_res_range .ui-state-default").css("border", "1px blue");
+        $("#num_res_range .ui-state-default").css("background-image", "linear-gradient(to right, #2724FF 0%, #4445BA 51%, #3535db 100%)");
+        $("#num_res_range .ui-widget-header").css("background", "white");
       });
     });
   </script>
@@ -40,7 +75,7 @@ so any removal or modification may cause errors and unexpected behavior -->
       <h1>Know your rights.</h1>
       <div style="width: inherit">
         <h3>COVID is affecting everyone in unique ways, but one thing unites us all – our rights.</h3>
-        <h3 style="color: #4445BA">We're here to help.</h3>
+        <h3 style="color: #4445BA">If you're in Illinois, we're here to help.</h3>
       </div>
       <h5><a style="color: white" target="_blank" rel="nofollow noopener noreferrer" href="https://legal-pro-tips.herokuapp.com">Open prototype 1</a></h5>
       <form id="query_form" method="dialog">
@@ -53,6 +88,18 @@ so any removal or modification may cause errors and unexpected behavior -->
         <button type="button" class="search_btn" id="query_submit" onclick="getLegalTips()">
           Search
         </button>
+        <div class="input_filters_area">
+          <div id="reddit_slider_holder" style="width: 50%; padding-right: 5px">
+            <h5 style="display: inline-block">Get Reddit results in range (UTC):</h5>
+            <span id="date_range_disp" style="display: inline-block"></span>
+            <div id="reddit_date_range" style="width: 40%; background: white"></div>
+          </div>
+          <div id="num_res_slider_holder" style="width: 50%; padding-right: 5px">
+            <h5 style="display: inline-block">Max results per category:</h5>
+            <span id="num_res_range_disp" style="display: inline-block">1</span>
+            <div id="num_res_range" style="width: 40%; background: white"></div>
+          </div>
+        </div>
       </form>
     </div>
     <!-- There are 3 primary div elements in results_area:
