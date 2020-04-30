@@ -11,13 +11,25 @@
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
   <script>
     $(document).ready(function() {
+      /*
+        Sets the window width to the maximum value and prevents div shifting
+        on window resize events
+      */
       $("#ultimate_div").css("width", window.screen.width);
+
+      /*
+        Enter button keypress triggers app to send query to server
+      */
       $(document).keyup(function(event) {
         if (event.keyCode == 13) {
           event.preventDefault();
           getLegalTips();
         }
       });
+
+      /*
+        Initializing the reddit date range selector
+      */
       $(function() {
         $("#reddit_date_range").slider({
           range: true,
@@ -30,6 +42,10 @@
               new Date(date_val.values[1] * 1000).toDateString());
           }
         });
+
+        /*
+          Initialize the number of return results slider
+        */
         $("#num_res_range").slider({
           min: 5,
           max: 100,
@@ -39,9 +55,17 @@
             $("#num_res_range_disp").text(val.value);
           }
         });
+
+        /*
+          Initializing text display of data attached to above sliders
+        */
         $("#date_range_disp").text(new Date("2019-12-01").toDateString() + ' to ' +
           new Date("2020-04-19").toDateString());
         $("#num_res_range_disp").text(5);
+
+        /*
+          Altering CSS of the slider elements
+        */
         $("#reddit_date_range .ui-state-default").css("background-size", "200%");
         $("#reddit_date_range .ui-state-default").css("border", "1px blue");
         $("#reddit_date_range .ui-state-default").css("background-image", "linear-gradient(to right, #2724FF 0%, #4445BA 51%, #3535db 100%)");
@@ -50,6 +74,102 @@
         $("#num_res_range .ui-state-default").css("border", "1px blue");
         $("#num_res_range .ui-state-default").css("background-image", "linear-gradient(to right, #2724FF 0%, #4445BA 51%, #3535db 100%)");
         $("#num_res_range .ui-widget-header").css("background", "white");
+      });
+
+      /*
+        Setting up autocomplete for the query
+      */
+      $(function() {
+        var key_words = [
+          "rent",
+          "rented",
+          "quarantine",
+          "quarantined",
+          "tax",
+          "taxed",
+          "taxes",
+          "legal",
+          "legality",
+          "illegal",
+          "statute",
+          "statutes",
+          "law",
+          "laws",
+          "fine",
+          "curfew",
+          "mandatory",
+          "landlord",
+          "evict",
+          "evicted",
+          "eviction",
+          "raise",
+          "raised",
+          "price",
+          "prices",
+          "gouge",
+          "gouging",
+          "increase",
+          "increased",
+          "decrease",
+          "decreased",
+          "infect",
+          "infected",
+          "laid-off",
+          "laid",
+          "off",
+          "furlough",
+          "furloughed",
+          "sick",
+          "ill",
+          "medical",
+          "bills",
+          "hospital",
+          "federal",
+          "state",
+          "government",
+          "aid",
+          "financial",
+          "finance",
+          "coronavirus",
+          "COVID-19",
+          "COVID",
+          "pandemic",
+          "epidemic"
+        ];
+        $("#query_input")
+          .on("keydown", function(event){
+            if(event.keyCode == 9 && $(this).autocomplete("instance").menu.active) {
+              event.preventDefault();
+            }
+          })
+          .autocomplete({
+            minLength: 0,
+            source: function(req, resp) {
+              total_words = req.term.split(" ");
+              last_word = total_words.pop();
+              pre_words = total_words.join(" ");
+              potential_words = key_words.filter(function(in_str) {
+                return in_str.toLowerCase().indexOf(last_word.toLowerCase()) == 0;
+              });
+              is_cap = last_word.length > 0 && last_word[0] == last_word[0].toUpperCase();
+              potential_words = potential_words.map(function(in_str) {
+                if(is_cap) {
+                  return pre_words + " " + in_str[0].toUpperCase() + in_str.substring(1);
+                } else {
+                  return pre_words + " " + in_str;
+                }
+              })
+              potential_words = potential_words.slice(0, Math.min(potential_words.length, 10));
+              resp(potential_words);
+            },
+            focus: function() {
+              return false;
+            },
+            select: function(event, input_area) {
+              this.value = input_area.item.value + " ";
+              return false;
+            }
+          })
       });
     });
   </script>
@@ -83,7 +203,7 @@ so any removal or modification may cause errors and unexpected behavior -->
           equivalent vertical height and alignment, although imported themes
           may have different alignments. Potentially utilize jquery to manually
           set element height and alignment if necessary -->
-        <input class="middle_vert_align" type="text" id="query_input" name="query_input2" placeholder="What can we help you with?">
+        <input class="middle_vert_align" type="text" id="query_input" placeholder="What can we help you with?">
         </input>
         <button type="button" class="search_btn" id="query_submit" onclick="getLegalTips()">
           Search
