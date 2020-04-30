@@ -64,7 +64,8 @@ class CaseData():
             case_file = json.load(open(case_file_path))
             for case in case_file:
                 str_id = str(case[1])
-                ret[str_id] = (case[0], case[2], str_id, case[3])
+                relevant_casebody = self.getRelevantCaseBody(case[2])
+                ret[str_id] = (case[0], relevant_casebody, str_id, case[3])
         return ret
 
     def getCaseDict(self):
@@ -72,3 +73,32 @@ class CaseData():
         Middle-man function that returns the correct case dict
         '''
         return self.getCaseDictFromFile()
+
+    def getRelevantCaseBody(self, text):
+        '''
+        Parameters: str of a case description
+
+        Returns: str of a case description filtered to only show the opinion of the court 
+        '''
+        opinion_of_the_court = 'opinion of the court:'
+        len_opinion_of_the_court = len(opinion_of_the_court)
+        opinion_of_the_court_ind = text.find(opinion_of_the_court)
+        if opinion_of_the_court_ind != -1:
+            start_ind = opinion_of_the_court_ind + len_opinion_of_the_court
+            return text[start_ind:]
+
+        opinion_opinion = 'opinion. OPINION'
+        len_opinion_opinion = len(opinion_opinion)
+        opinion_opinion_ind = text.find(opinion_opinion)
+        if opinion_opinion_ind != -1:
+            start_ind = opinion_opinion_ind + len(opinion_opinion)
+            return text[start_ind:]
+
+        judgement_and_opinion = 'judgment of the court and the following opinion:'
+        len_judgement_and_opinion = len(judgement_and_opinion)
+        judgement_and_opinion_ind = text.find(judgement_and_opinion)
+        if judgement_and_opinion_ind != -1:
+            start_ind = judgement_and_opinion_ind + len_judgement_and_opinion
+            return text[start_ind:]
+
+        return text

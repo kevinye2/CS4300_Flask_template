@@ -209,15 +209,15 @@ so any removal or modification may cause errors and unexpected behavior -->
           Search
         </button>
         <div class="input_filters_area">
-          <div id="reddit_slider_holder" style="width: 50%; padding-right: 5px">
-            <h5 style="display: inline-block">Get Reddit results in range (UTC):</h5>
+          <div id="reddit_slider_holder" style="width: 30%; padding-right: 5px; display: inline-block;">
+            <h5 style="display: block; font-weight: bold;">Filter Reddit results by date:</h5>
             <span id="date_range_disp" style="display: inline-block"></span>
-            <div id="reddit_date_range" style="width: 40%; background: white"></div>
+            <div id="reddit_date_range" style="width: 70%; background: white"></div>
           </div>
-          <div id="num_res_slider_holder" style="width: 50%; padding-right: 5px">
-            <h5 style="display: inline-block">Max results per category:</h5>
+          <div id="num_res_slider_holder" style="width: 30%; padding-right: 5px; display: inline-block;">
+            <h5 style="display: block; font-weight: bold;">Max number of results per category:</h5>
             <span id="num_res_range_disp" style="display: inline-block">1</span>
-            <div id="num_res_range" style="width: 40%; background: white"></div>
+            <div id="num_res_range" style="width: 70%; background: white"></div>
           </div>
         </div>
       </form>
@@ -244,6 +244,7 @@ so any removal or modification may cause errors and unexpected behavior -->
         <button type="button" class="transparent_button" id="choose_reddit" data-category="reddit_info_container" onclick="setCategory(this)">
           Reddit
         </button>
+        
       </div>
       <div class="middle_org" id="codes_info_container" style="display: none">
         <!-- The elements in codes_info_container are identical in purpose
