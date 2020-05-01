@@ -53,15 +53,17 @@ def rocchioFilter(query, relevance_data, rocchio, rank_info, doc_rankings, conte
 
 def logRegFilter(query, relevance_data, log_reg, doc_rankings, content_dict, reddit_range_utc=None):
     log_reg.addMultipleTraining(relevance_data)
-    predictions = log_reg.predictRelevance(query, doc_rankings)
+    new_rankings = log_reg.predictRelevanceRanking(query, doc_rankings)
     log_reg.resetAll()
     ret = []
-    for idx, doc_id in enumerate(doc_rankings):
+    for idx in range(len(doc_rankings)):
+        actual_idx = new_rankings[idx]
+        doc_id = doc_rankings[actual_idx]
         content = content_dict[doc_id]
-        if predictions[idx] == 1 and reddit_range_utc is None:
+        if reddit_range_utc is None:
             ret.append((content[0], content[1][0:min(len(content[1]), 3000):1],
                 doc_id, content[3]))
-        elif predictions[idx] == 1 and not reddit_range_utc is None:
+        else:
             if content[4] >= reddit_range_utc[0] and content[4] <= reddit_range_utc[1]:
                 ret.append((content[0], content[1][0:min(len(content[1]), 3000):1],
                     doc_id, content[3]))

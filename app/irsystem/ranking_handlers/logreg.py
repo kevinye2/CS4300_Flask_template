@@ -48,9 +48,9 @@ class LogReg():
             self.accum_training = sparse.vstack((self.accum_training, concat), format='csr')
             self.accum_label = np.append(self.accum_label, label)
 
-    def predictRelevance(self, query, doc_ids):
+    def predictRelevanceRanking(self, query, doc_ids):
         if len(doc_ids) < 2 or self.log_reg_model is None:
-            return [1] * len(doc_ids)
+            return range(len(doc_ids))
         q = self.tfidf_obj.vectorizeQuery(query)
         init_pos = self.doc_idx_dict[doc_ids[0]]
         init_csr = sparse.hstack((q, self.tfidf[init_pos]), format='csr')
@@ -61,14 +61,9 @@ class LogReg():
         prob_predictions = self.log_reg_model.predict_proba(init_csr)
         positive_class_idx = self.log_reg_model.classes_.tolist().index(1)
         prob_labels = [elem[positive_class_idx] for elem in prob_predictions]
-        # Any positive probability relevance >= the probability relevance
-        # value of the document ranked highest by tfidf cosine similarity
-        # or >= the avg probability relevance will be returned as relevant
-        baseline_val = prob_labels[0]
-        avg = statistics.mean(prob_labels)
-        for i, prob in enumerate(prob_labels):
-            prob_labels[i] = 1 if prob >= baseline_val or prob >= avg else -1
-        return prob_labels
+        # Sort the docs by their positive probability score in descending order
+        prob_labels_sorted = np.flip(np.argsort(np.array(prob_labels))).tolist()
+        return prob_labels_sorted
 
     def retrain(self):
         init_time = time.time()
