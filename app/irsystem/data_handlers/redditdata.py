@@ -66,13 +66,39 @@ class RedditData():
             for k, submission in enumerate(reddit_file):
                 if 'selftext' not in submission:
                     continue
-                str_id = str(submission['id'])
-                ret[str_id] = ((submission['title'],
-                    submission['selftext'],
-                    str_id,
-                    submission['full_link'],
-                    submission['created_utc']))
+                whole_text = submission['title'] + ' ' + submission['selftext']
+                if self.granularClean(whole_text):
+                    str_id = str(submission['id'])
+                    ret[str_id] = ((submission['title'],
+                        submission['selftext'],
+                        str_id,
+                        submission['full_link'],
+                        submission['created_utc']))
         return ret
+
+    def granularClean(self, whole_text):
+        bad_list = [
+            'grade',
+            'gpa',
+            'g.p.a',
+            'class',
+            ' cs ',
+            'computer science',
+            'engineering',
+            'arts',
+            'sciences',
+            'physics',
+            'homework',
+            'assignment',
+            'math',
+            'project',
+            'professor',
+            'teacher',
+        ]
+        for w in bad_list:
+            if w in whole_text.lower():
+                return False
+        return True
 
     def getRedditDict(self):
         '''
