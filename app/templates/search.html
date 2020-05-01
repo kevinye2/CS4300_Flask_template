@@ -34,9 +34,9 @@
         $("#reddit_date_range").slider({
           range: true,
           min: new Date("2019-12-01").getTime() / 1000,
-          max: new Date("2020-04-19").getTime() / 1000,
+          max: new Date("2020-04-30").getTime() / 1000,
           step: 86400,
-          values: [new Date("2019-12-01").getTime() / 1000, new Date("2020-04-19").getTime() / 1000],
+          values: [new Date("2019-12-01").getTime() / 1000, new Date("2020-04-30").getTime() / 1000],
           slide: function(event, date_val) {
             $("#date_range_disp").text(new Date(date_val.values[0] * 1000).toDateString() + ' to ' +
               new Date(date_val.values[1] * 1000).toDateString());
@@ -60,7 +60,7 @@
           Initializing text display of data attached to above sliders
         */
         $("#date_range_disp").text(new Date("2019-12-01").toDateString() + ' to ' +
-          new Date("2020-04-19").toDateString());
+          new Date("2020-04-30").toDateString());
         $("#num_res_range_disp").text(5);
 
         /*
@@ -137,8 +137,8 @@
           "epidemic"
         ];
         $("#query_input")
-          .on("keydown", function(event){
-            if(event.keyCode == 9 && $(this).autocomplete("instance").menu.active) {
+          .on("keydown", function(event) {
+            if (event.keyCode == 9 && $(this).autocomplete("instance").menu.active) {
               event.preventDefault();
             }
           })
@@ -153,7 +153,7 @@
               });
               is_cap = last_word.length > 0 && last_word[0] == last_word[0].toUpperCase();
               potential_words = potential_words.map(function(in_str) {
-                if(is_cap) {
+                if (is_cap) {
                   return pre_words + " " + in_str[0].toUpperCase() + in_str.substring(1);
                 } else {
                   return pre_words + " " + in_str;
@@ -169,7 +169,7 @@
               this.value = input_area.item.value + " ";
               return false;
             }
-          })
+          });
       });
     });
   </script>
@@ -208,15 +208,27 @@ so any removal or modification may cause errors and unexpected behavior -->
         <button type="button" class="search_btn" id="query_submit" onclick="getLegalTips()">
           Search
         </button>
+        <div id="ml_option_area" style="width: 50%; padding-right: 5px; padding-top: 10px">
+          <h5 style="display: inline-block">Relevance feedback type:</h5>
+          <button type="button" class="transparent_button" id="choose_no_ml" data-mltype=0 onclick="setML(this)">
+            None
+          </button>
+          <button type="button" class="transparent_button_wide" id="choose_log_reg" data-mltype=1 onclick="setML(this)">
+            Logistic Regression
+          </button>
+          <button type="button" class="transparent_button" id="choose_rocchio" data-mltype=2 onclick="setML(this)">
+            Rocchio
+          </button>
+        </div>
         <div class="input_filters_area">
-          <div id="reddit_slider_holder" style="width: 30%; padding-right: 5px; display: inline-block;">
-            <h5 style="display: block; font-weight: bold;">Filter Reddit results by date:</h5>
-            <span id="date_range_disp" style="display: inline-block"></span>
+          <div id="reddit_slider_holder" style="width: 30%; padding-right: 5px; display: inline-block">
+            <h5 style="display: block; font-weight: bold">Filter Reddit results by date (UTC):</h5>
+            <span id="date_range_disp" style="display: inline-block; padding-bottom: 10px"></span>
             <div id="reddit_date_range" style="width: 70%; background: white"></div>
           </div>
-          <div id="num_res_slider_holder" style="width: 30%; padding-right: 5px; display: inline-block;">
-            <h5 style="display: block; font-weight: bold;">Max number of results per category:</h5>
-            <span id="num_res_range_disp" style="display: inline-block">1</span>
+          <div id="num_res_slider_holder" style="width: 30%; padding-right: 5px; display: inline-block">
+            <h5 style="display: block; font-weight: bold">Max number of results per category:</h5>
+            <span id="num_res_range_disp" style="display: inline-block; padding-bottom: 10px">1</span>
             <div id="num_res_range" style="width: 70%; background: white"></div>
           </div>
         </div>
@@ -244,7 +256,6 @@ so any removal or modification may cause errors and unexpected behavior -->
         <button type="button" class="transparent_button" id="choose_reddit" data-category="reddit_info_container" onclick="setCategory(this)">
           Reddit
         </button>
-        
       </div>
       <div class="middle_org" id="codes_info_container" style="display: none">
         <!-- The elements in codes_info_container are identical in purpose

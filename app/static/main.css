@@ -260,6 +260,19 @@ h3 {
   margin-left: 10px;
 }
 
+.transparent_button_wide {
+  color: white;
+  background-color: inherit;
+  background-image: none;
+  border-radius: 5px;
+  border-color: blue;
+  font-size: 12px;
+  color: blue;
+  height: 30px;
+  width: 160px;
+  margin-left: 10px;
+}
+
 .transparent_button_small {
   color: white;
   background-color: inherit;

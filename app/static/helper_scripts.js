@@ -56,9 +56,13 @@ var feedbacks_failed = {};
 /*
   Which category was chosen to display, either legal codes, cases, or reddit
 */
-var chosen_category = 'reddit_info_container';
+var chosen_category = "reddit_info_container";
 
 var chosen_category_elem;
+
+var chosen_ml = -1
+
+var searched_once = false;
 
 /*
   The total number of pages for the code, case, and reddit categories
@@ -115,11 +119,15 @@ function getLegalTips() {
   } else if (chosen_category == "") {
     alert("Please select a category");
     return;
+  } else if (chosen_ml < 0) {
+    alert("Please select a relevance feedback type");
+    return;
   }
   request_json_obj = {
     query: query,
     reddit_range_utc: $("#reddit_date_range").slider("option", "values"),
-    max_res: $("#num_res_range").slider("option", "value")
+    max_res: $("#num_res_range").slider("option", "value"),
+    ml_mode: chosen_ml
   };
   requester.open("POST", '/postquery', true);
   requester.setRequestHeader("Content-Type", "application/json");
@@ -129,6 +137,7 @@ function getLegalTips() {
       innerHTMLHandler(json_resp);
       document.getElementById("query_submit").innerHTML = "Search";
       setCategory(chosen_category_elem !== undefined ? chosen_category_elem : document.getElementById("choose_reddit"));
+      searched_once = true;
     }
   }
   document.getElementById("results_area").setAttribute("style", "visibility: hidden");
@@ -162,7 +171,7 @@ function sendRelevanceFeedback(elem) {
   requester.open("POST", '/postfeedback', true);
   requester.setRequestHeader("Content-Type", "application/json");
   requester.onreadystatechange = function() {
-    if (this.readyState == XMLHttpRequest.DONE && this.status === 200) {
+    if (this.readyState == XMLHttpRequest.DONE && (this.status === 200 || this.status === 201)) {
       feedbacks_sent[elem.id] = true;
       feedbacks_failed[elem.id] = false;
       if (elem.id.substring(0, 1) == '1') {
@@ -170,7 +179,14 @@ function sendRelevanceFeedback(elem) {
       } else {
         document.getElementById(elem.id).innerHTML = "Dislike sent!";
       }
-    } else {
+      if(this. status === 201) {
+        alert("A round of data has been collected for relevance feedback," +
+        "\npress search again to update results or continue providing feedback");
+      }
+    } else if (this.readyState == XMLHttpRequest.DONE) {
+      if (this.status === 400) {
+        alert("Please ensure you have a mix of like/dislike relevancy feedback");
+      }
       feedbacks_failed[elem.id] = true;
       if (elem.id.substring(0, 1) == '1') {
         document.getElementById(elem.id).innerHTML = "Like send failed";
@@ -183,7 +199,8 @@ function sendRelevanceFeedback(elem) {
     query: query,
     relevant_rating: [elem.dataset.category, elem.id.substring(1),
       parseInt(elem.dataset.rank), elem.id.substring(0, 1) == '1'
-    ]
+    ],
+    ml_mode: chosen_ml
   };
   document.getElementById(elem.id).innerHTML = "Sending...";
   requester.send(JSON.stringify(request_json_obj));
@@ -205,6 +222,17 @@ function setCategory(elem) {
     showResults();
     populateData();
   }
+}
+
+function setML(elem) {
+  chosen_ml = elem.dataset.mltype
+  if (searched_once) {
+    getLegalTips();
+  }
+  $("#choose_no_ml").attr("style", "background-color: inherit");
+  $("#choose_log_reg").attr("style", "background-color: inherit");
+  $("#choose_rocchio").attr("style", "background-color: inherit");
+  $("#" + elem.id).attr("style", "background-color: blue; color: white");
 }
 
 /*

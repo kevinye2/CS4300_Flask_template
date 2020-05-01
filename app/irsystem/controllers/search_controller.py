@@ -22,8 +22,8 @@ def handleQuery():
 			reddit_range_utc[1] = int(reddit_range_utc[1])
 		else:
 			reddit_range_utc = [0, 2 * (10**9)]
-		ml_on= request.json.get('ml_on') if not request.json.get('ml_on') is None else False
-		resp_obj = legalTipResp(query, max_res, reddit_range_utc, ml_on)
+		ml_mode = int(request.json.get('ml_mode')) if not request.json.get('ml_mode') is None else 0
+		resp_obj = legalTipResp(query, max_res, reddit_range_utc, ml_mode)
 		return Response(response=json.dumps(resp_obj), status=200,
 			content_type='application/json')
 
@@ -32,6 +32,7 @@ def handleFeedback():
 	with mutex:
 		query = request.json.get('query')
 		relevant_doc_id = request.json.get('relevant_rating')
-		resp_obj = feedbackRatings(query, relevant_doc_id)
-		return Response(response=json.dumps(resp_obj), status=200,
+		ml_mode = int(request.json.get('ml_mode')) if not request.json.get('ml_mode') is None else 0
+		resp_code = feedbackRatings(query, relevant_doc_id, ml_mode)
+		return Response(response=json.dumps({}), status=resp_code,
 			content_type='application/json')

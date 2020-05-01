@@ -1,18 +1,13 @@
 import random
-import os
-import praw
 import time
 import numpy as np
 from scipy import sparse
-from sklearn.metrics.pairwise import linear_kernel
 from sklearn.feature_extraction.text import TfidfVectorizer
-from app.irsystem.data_handlers.redditdata import RedditData
-from app.irsystem.data_handlers.casedata import CaseData
-from app.irsystem.data_handlers.statutedata import StatuteData
 from sklearn.linear_model import LogisticRegression
+import statistics
 
 class LogReg():
-    def __init__(self, tfidf_data, data_path, label_path):
+    def __init__(self, tfidf_data):
         self.tfidf_obj = tfidf_data
         self.clean_data = tfidf_data.clean_data
         self.doc_idx_dict = tfidf_data.doc_idx_dict
@@ -20,16 +15,16 @@ class LogReg():
         self.feat = tfidf_data.feat
         self.idf = tfidf_data.idf
         self.term_idx_dict = tfidf_data.term_idx_dict
-        self.DATA_PATH = data_path
-        self.LABEL_PATH = label_path
-        try:
-            self.accum_training = sparse.load_npz(self.DATA_PATH)
-            self.accum_label = sparse.load_npz(self.LABEL_PATH)
-        except Exception:
-            self.accum_training = None
-            self.accum_label = None
+        self.log_reg_model = None
+        self.accum_training = None
+        self.accum_label = None
 
-    def addTraining(self, query, doc_id, label):
+    def resetAll():
+        self.accum_training = None
+        self.accum_label = None
+        self.log_reg_model = None
+
+    def addTraining(self, query, doc_id, label, interval=5):
         q = self.tfidf_obj.vectorizeQuery(query)
         doc_idx = self.doc_idx_dict[doc_id]
         data = self.tfidf[doc_idx:doc_idx + 1]
@@ -37,10 +32,45 @@ class LogReg():
         label = label * np.ones((1))
         if self.accum_label is None or self.accum_training is None:
             self.accum_training = concat
-            self.accum_label = sparse.csr_matrix(label)
+            self.accum_label = np.ones((1))
+            self.accum_label[0] = label
         else:
             self.accum_training = sparse.vstack((self.accum_training, concat), format='csr')
-            self.accum_label = sparse.hstack((self.accum_label, label), format='csr')
+            self.accum_label = np.append(self.accum_label, label)
+        if self.accum_training.shape[0] > 0 and self.accum_training.shape[0] % interval == 0:
+            return self.retrain()
+        return 200
+
+    def predictRelevance(self, query, doc_ids, pass_through=False):
+        if pass_through or len(doc_ids) < 2 or self.log_reg_model is None:
+            return [1] * len(doc_ids)
+        q = self.tfidf_obj.vectorizeQuery(query)
+        init_pos = self.doc_idx_dict[doc_ids[0]]
+        init_csr = sparse.hstack((q, self.tfidf[init_pos]), format='csr')
+        for i in range(1, len(doc_ids)):
+            cur_pos = self.doc_idx_dict[doc_ids[i]]
+            adder = sparse.hstack((q, self.tfidf[cur_pos]), format='csr')
+            init_csr = sparse.vstack((init_csr, adder), format='csr')
+        prob_predictions = self.log_reg_model.predict_proba(init_csr)
+        positive_class_idx = self.log_reg_model.classes_.tolist().index(1)
+        prob_labels = [elem[positive_class_idx] for elem in prob_predictions]
+        # Any positive probability relevance >= the probability relevance
+        # value of the document ranked highest by tfidf cosine similarity
+        # or >= the avg probability relevance will be returned as relevant
+        baseline_val = prob_labels[0]
+        avg = statistics.mean(prob_labels)
+        for i, prob in enumerate(prob_labels):
+            prob_labels[i] = 1 if prob >= baseline_val or prob >= avg else -1
+        return prob_labels
 
     def retrain(self):
-        pass
+        init_time = time.time()
+        try:
+            self.log_reg_model = LogisticRegression(random_state=1) \
+                .fit(self.accum_training, self.accum_label)
+        except Exception:
+            self.log_reg_model = None
+            print(time.time() - init_time, flush=True)
+            return 400
+        print(time.time() - init_time, flush=True)
+        return 201

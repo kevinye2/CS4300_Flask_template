@@ -6,9 +6,6 @@ import numpy as np
 from scipy import sparse
 from sklearn.metrics.pairwise import linear_kernel
 from sklearn.feature_extraction.text import TfidfVectorizer
-from app.irsystem.data_handlers.redditdata import RedditData
-from app.irsystem.data_handlers.casedata import CaseData
-from app.irsystem.data_handlers.statutedata import StatuteData
 
 class TFIDFHolder():
     def __init__(self, clean_data):
@@ -130,7 +127,35 @@ class TFIDFHolder():
         query_tfidf_csr_vec = sparse.csr_matrix((query_tfidf_vec, (np.zeros(len(query_idxs)), query_tfidf_vec_pos)),
             shape=(1, len(self.term_idx_dict)))
         ranked_res = linear_kernel(query_tfidf_csr_vec, self.tfidf).flatten()
-        sorted_idx_ranked_res = np.flip(np.argsort(ranked_res))[0:upper_limit:1]
+        sorted_idx_ranked_res = np.flip(np.argsort(ranked_res))
+        sorted_idx_ranked_res = sorted_idx_ranked_res[0:min(upper_limit, sorted_idx_ranked_res.size):1]
+        for i, idx in enumerate(sorted_idx_ranked_res):
+            ret.append(self.clean_data[0][idx])
+        return ret
+
+    def getRankingsWithQueryVector(self, query_vector, upper_limit=100):
+        '''
+        Compute resulting ranking cosine similarity between the query and corpus of docs represented
+        by the TF-IDF matrix.
+
+        parameters:
+            query_vector: query vector, csr form
+            clean_data[0]: List of doc_ids, ordered congruently to the corresponding
+            rows of tfidf_matrix
+            self.tfidf: TF-IDF matrix where each row corresponds to a document
+            self.feat: List of all tokens, indexed corresponding to the columns
+            of tfidf_matrix
+            self.idf: List of all idf values, indexed per corresponding query index
+            self.term_idx_dict: Dictionary of key: query, value: corresponding index
+            in idf_array and feature_names
+            upper_limit: maximum relevant results to be returned
+        returns:
+            Sorted (ranked) list of doc_id, most relevant first
+        '''
+        ret = []
+        ranked_res = linear_kernel(query_vector, self.tfidf).flatten()
+        sorted_idx_ranked_res = np.flip(np.argsort(ranked_res))
+        sorted_idx_ranked_res = sorted_idx_ranked_res[0:min(upper_limit, sorted_idx_ranked_res.size):1]
         for i, idx in enumerate(sorted_idx_ranked_res):
             ret.append(self.clean_data[0][idx])
         return ret
