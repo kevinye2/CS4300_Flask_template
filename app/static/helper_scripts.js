@@ -44,25 +44,45 @@ var reddit = {};
 var reddit_stop_words = {};
 
 /*
-  Dictionary identifying which documents had feedback sent successfully
-*/
-var feedbacks_sent = {};
-
-/*
-  Dictionary identifying which documents had feedback sent unsuccessfully
-*/
-var feedbacks_failed = {};
-
-/*
   Which category was chosen to display, either legal codes, cases, or reddit
 */
 var chosen_category = "reddit_info_container";
 
 var chosen_category_elem;
 
-var chosen_ml = -1
+var chosen_ml = -1;
 
 var searched_once = false;
+
+/*
+  [number of likes, number of dislikes] for each feedback mode
+*/
+var relevance_frequency = {
+  1: [0, 0],
+  2: [0, 0]
+}
+
+/*
+  Detailed tracker of recorded feedback
+  The key order goes as:
+    chosen_ml -> category -> query -> doc_id ->
+      {
+        is_relevant: boolean,
+        ranking: int
+      }
+*/
+var feedbacks_record = {
+  1: {
+    "codes_info": {},
+    "cases_info": {},
+    "reddit_info": {}
+  },
+  2: {
+    "codes_info": {},
+    "cases_info": {},
+    "reddit_info": {}
+  }
+};
 
 /*
   The total number of pages for the code, case, and reddit categories
@@ -106,6 +126,7 @@ var results_ready = false;
   innerHTMLHandler is called, and data is constructed and displayed
 */
 function getLegalTips() {
+  var mixed_request = true;
   query = document.getElementById("query_input").value
   query = query.replace(/[^ 0-9a-z]+/gi, '')
   query = query.trim().toLowerCase();
@@ -122,12 +143,22 @@ function getLegalTips() {
   } else if (chosen_ml < 0) {
     alert("Please select a relevance feedback type");
     return;
+  } else if (chosen_ml > 0 &&
+    relevance_frequency[chosen_ml][0] != relevance_frequency[chosen_ml][1] &&
+    (relevance_frequency[chosen_ml][0] == 0 || relevance_frequency[chosen_ml][1] == 0)) {
+    if (chosen_ml === 1) {
+      alert("Please ensure you have a mix of feedback for Logistic Regression");
+    } else if (chosen_ml === 2) {
+      alert("Please ensure you have a mix of feedback for Rocchio");
+    }
+    mixed_request = false;
   }
   request_json_obj = {
     query: query,
     reddit_range_utc: $("#reddit_date_range").slider("option", "values"),
     max_res: $("#num_res_range").slider("option", "value"),
-    ml_mode: chosen_ml
+    ml_mode: chosen_ml,
+    relevance_feedbacks: chosen_ml === 0 || !mixed_request ? null : feedbacks_record[chosen_ml]
   };
   requester.open("POST", '/postquery', true);
   requester.setRequestHeader("Content-Type", "application/json");
@@ -142,9 +173,9 @@ function getLegalTips() {
   }
   document.getElementById("results_area").setAttribute("style", "visibility: hidden");
   document.getElementById("category_selection").setAttribute("style", "visibility: hidden");
-  requester.send(JSON.stringify(request_json_obj));
   document.getElementById("query_submit").innerHTML = "Retrieving...";
   results_ready = false;
+  requester.send(JSON.stringify(request_json_obj));
 }
 
 /*
@@ -152,58 +183,38 @@ function getLegalTips() {
   is relevant to the query input
 */
 function sendRelevanceFeedback(elem) {
-  if (elem.id in feedbacks_sent) {
-    alert("Feedback already sent");
+  var true_doc_id = elem.id.substring(1)
+  if (chosen_ml === 0) {
+    alert("You are not in feedback mode, please select one first");
     return;
   }
-  if (elem.id.substring(0, 1) == '1') {
+  if (query in feedbacks_record[chosen_ml][elem.dataset.category] &&
+    true_doc_id in feedbacks_record[chosen_ml][elem.dataset.category][query]) {
+    alert("Feedback already sent for this query and relevance feedback type");
+    return;
+  }
+  if (!(query in feedbacks_record[chosen_ml][elem.dataset.category])) {
+    feedbacks_record[chosen_ml][elem.dataset.category][query] = {};
+  }
+  // Recording exact feedback details
+  feedbacks_record[chosen_ml][elem.dataset.category][query][true_doc_id] = {
+    "is_relevant": parseInt(elem.id.substring(0, 1), 10) === 1,
+    "rank": parseInt(elem.dataset.rank, 10)
+  };
+  relevance_frequency[chosen_ml][parseInt(elem.id.substring(0, 1), 10)] += 1;
+  if (parseInt(elem.dataset.yesrel, 10) === 1) {
+    document.getElementById(elem.id).innerHTML = "Liked!";
     var temp_elem = document.getElementById('0' + elem.id.substring(1))
     if (temp_elem !== null) {
       temp_elem.setAttribute("style", "display: none");
     }
   } else {
+    document.getElementById(elem.id).innerHTML = "Disliked!";
     var temp_elem = document.getElementById('1' + elem.id.substring(1))
     if (temp_elem !== null) {
       temp_elem.setAttribute("style", "display: none");
     }
   }
-  var requester = new XMLHttpRequest();
-  requester.open("POST", '/postfeedback', true);
-  requester.setRequestHeader("Content-Type", "application/json");
-  requester.onreadystatechange = function() {
-    if (this.readyState == XMLHttpRequest.DONE && (this.status === 200 || this.status === 201)) {
-      feedbacks_sent[elem.id] = true;
-      feedbacks_failed[elem.id] = false;
-      if (elem.id.substring(0, 1) == '1') {
-        document.getElementById(elem.id).innerHTML = "Like sent!";
-      } else {
-        document.getElementById(elem.id).innerHTML = "Dislike sent!";
-      }
-      if(this. status === 201) {
-        alert("A round of data has been collected for relevance feedback," +
-        "\npress search again to update results or continue providing feedback");
-      }
-    } else if (this.readyState == XMLHttpRequest.DONE) {
-      if (this.status === 400) {
-        alert("Please ensure you have a mix of like/dislike relevancy feedback");
-      }
-      feedbacks_failed[elem.id] = true;
-      if (elem.id.substring(0, 1) == '1') {
-        document.getElementById(elem.id).innerHTML = "Like send failed";
-      } else {
-        document.getElementById(elem.id).innerHTML = "Dislike send failed";
-      }
-    }
-  }
-  var request_json_obj = {
-    query: query,
-    relevant_rating: [elem.dataset.category, elem.id.substring(1),
-      parseInt(elem.dataset.rank), elem.id.substring(0, 1) == '1'
-    ],
-    ml_mode: chosen_ml
-  };
-  document.getElementById(elem.id).innerHTML = "Sending...";
-  requester.send(JSON.stringify(request_json_obj));
 }
 
 /*
@@ -225,7 +236,7 @@ function setCategory(elem) {
 }
 
 function setML(elem) {
-  chosen_ml = elem.dataset.mltype
+  chosen_ml = parseInt(elem.dataset.mltype, 10);
   if (searched_once) {
     getLegalTips();
   }
@@ -319,8 +330,6 @@ function clearResultsAndVariables() {
     "cases_info": 1,
     "reddit_info": 1
   };
-  feedbacks_sent = {};
-  feedbacks_failed = {};
   clearHTMLElement("codes_info");
   clearHTMLElement("cases_info");
   clearHTMLElement("reddit_info");
@@ -345,26 +354,22 @@ function clearHTMLElement(id) {
 function createIndividualResult(html_elem, id, link, title, content, rank) {
   var msg = "Like";
   var msg2 = "Dislike";
-  var temp_id = '';
-  var condition_1 = '1' + id in feedbacks_sent || '0' + id in feedbacks_sent;
-  var condition_2 = '1' + id in feedbacks_failed && feedbacks_failed['1' + id];
-  var condition_3 = '0' + id in feedbacks_failed && feedbacks_failed['0' + id];
-  if (condition_1 || condition_2 || condition_3) {
-    if (condition_1) {
-      if ('1' + id in feedbacks_sent) {
-        msg = 'Like sent!';
-        temp_id = '1' + id;
-      } else {
-        msg = 'Dislike sent!';
-        temp_id = '0' + id;
-      }
-
-    } else if (condition_2) {
-      msg = 'Like send failed';
-      temp_id = '1' + id;
-    } else if (condition_3) {
-      msg = 'Dislike send failed';
-      temp_id = '0' + id;
+  var temp_id = "";
+  var true_doc_id = id
+  var yesrel = 0;
+  if (chosen_ml > 0 &&
+    query in feedbacks_record[chosen_ml][html_elem.id] &&
+    true_doc_id in feedbacks_record[chosen_ml][html_elem.id][query]) {
+    var exact_feedback = feedbacks_record[chosen_ml][html_elem.id][query][true_doc_id];
+    var did_like = exact_feedback["is_relevant"];
+    if (did_like) {
+      temp_id = "1" + true_doc_id;
+      msg = "Liked!";
+      yesrel = 1;
+    } else {
+      temp_id = "0" + true_doc_id;
+      msg = "Disliked!"
+      yesrel = 0;
     }
     html_elem.insertAdjacentHTML("beforeend",
       '<div class="fixed_container"><span class="link_no_runon">' +
@@ -372,19 +377,19 @@ function createIndividualResult(html_elem, id, link, title, content, rank) {
       '</a></span><span class="no_runon"></span><br>' +
       '<button class="transparent_button_small" style="display: inline-block" id=' + temp_id +
       ' onclick="sendRelevanceFeedback(this)" data-rank="' + rank.toString() +
-      '" data-category="' + html_elem.id + '" style="font-size: 11px">' + msg + '</button></div>'
+      '" data-yesrel="' + yesrel + '" data-category="' + html_elem.id + '" style="font-size: 11px">' + msg + '</button></div>'
     );
   } else {
     html_elem.insertAdjacentHTML("beforeend",
       '<div class="fixed_container"><span class="link_no_runon">' +
       '<a target="_blank" href="' + link + '" rel="nofollow noopener noreferrer">' +
       '</a></span><span class="no_runon"></span><br>' +
-      '<button class="transparent_button_small" style="display: inline-block" id=' + '1' + id +
+      '<button class="transparent_button_small" style="display: inline-block" id=' + '1' + true_doc_id +
       ' onclick="sendRelevanceFeedback(this)" data-rank="' + rank.toString() +
-      '" data-category="' + html_elem.id + '" style="font-size: 11px">Like</button>' +
-      '<button class="transparent_button_small" style="display: inline-block" id=' + '0' + id +
+      '" data-yesrel="' + 1 + '" data-category="' + html_elem.id + '" style="font-size: 11px">Like</button>' +
+      '<button class="transparent_button_small" style="display: inline-block" id=' + '0' + true_doc_id +
       ' onclick="sendRelevanceFeedback(this)" data-rank="' + rank.toString() +
-      '" data-category="' + html_elem.id + '" style="font-size: 11px">Dislike</button></div>'
+      '" data-yesrel="' + 0 + '" data-category="' + html_elem.id + '" style="font-size: 11px">Dislike</button></div>'
     );
   }
 }
@@ -427,7 +432,7 @@ function pageChange(html_elem, id, data, new_page) {
   } else if (new_page == "previous") {
     cur_pages[id] -= 1;
   } else {
-    cur_pages[id] = parseInt(new_page);
+    cur_pages[id] = parseInt(new_page, 10);
   }
   clearHTMLElement(id);
   for (i = (cur_pages[id] - 1) * results_per_page; i < Math.min(cur_pages[id] * results_per_page, data.length); i++) {

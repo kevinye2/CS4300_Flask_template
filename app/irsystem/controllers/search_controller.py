@@ -23,16 +23,7 @@ def handleQuery():
 		else:
 			reddit_range_utc = [0, 2 * (10**9)]
 		ml_mode = int(request.json.get('ml_mode')) if not request.json.get('ml_mode') is None else 0
-		resp_obj = legalTipResp(query, max_res, reddit_range_utc, ml_mode)
+		relevance_feedbacks = request.json.get('relevance_feedbacks')
+		resp_obj = legalTipResp(query, max_res, reddit_range_utc, ml_mode, relevance_feedbacks)
 		return Response(response=json.dumps(resp_obj), status=200,
-			content_type='application/json')
-
-@irsystem.route('/postfeedback', methods=['POST'])
-def handleFeedback():
-	with mutex:
-		query = request.json.get('query')
-		relevant_doc_id = request.json.get('relevant_rating')
-		ml_mode = int(request.json.get('ml_mode')) if not request.json.get('ml_mode') is None else 0
-		resp_code = feedbackRatings(query, relevant_doc_id, ml_mode)
-		return Response(response=json.dumps({}), status=resp_code,
 			content_type='application/json')

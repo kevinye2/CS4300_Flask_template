@@ -19,13 +19,23 @@ class LogReg():
         self.accum_training = None
         self.accum_label = None
 
-    def resetAll():
+    def resetAll(self):
         self.accum_training = None
         self.accum_label = None
         self.log_reg_model = None
 
-    def addTraining(self, query, doc_id, label, interval=5):
-        q = self.tfidf_obj.vectorizeQuery(query)
+    def addMultipleTraining(self, relevance_data):
+        if len(relevance_data) < 1:
+            return
+        for cur_query in relevance_data:
+            cur_query_vector = self.tfidf_obj.vectorizeQuery(cur_query)
+            query_dict = relevance_data[cur_query]
+            for doc_id in query_dict:
+                label = 1 if query_dict[doc_id]['is_relevant'] else -1
+                self.addTraining(cur_query_vector, doc_id, label)
+        self.retrain()
+
+    def addTraining(self, q, doc_id, label):
         doc_idx = self.doc_idx_dict[doc_id]
         data = self.tfidf[doc_idx:doc_idx + 1]
         concat = sparse.hstack((q, data), format='csr')
@@ -37,12 +47,9 @@ class LogReg():
         else:
             self.accum_training = sparse.vstack((self.accum_training, concat), format='csr')
             self.accum_label = np.append(self.accum_label, label)
-        if self.accum_training.shape[0] > 0 and self.accum_training.shape[0] % interval == 0:
-            return self.retrain()
-        return 200
 
-    def predictRelevance(self, query, doc_ids, pass_through=False):
-        if pass_through or len(doc_ids) < 2 or self.log_reg_model is None:
+    def predictRelevance(self, query, doc_ids):
+        if len(doc_ids) < 2 or self.log_reg_model is None:
             return [1] * len(doc_ids)
         q = self.tfidf_obj.vectorizeQuery(query)
         init_pos = self.doc_idx_dict[doc_ids[0]]
@@ -70,7 +77,5 @@ class LogReg():
                 .fit(self.accum_training, self.accum_label)
         except Exception:
             self.log_reg_model = None
-            print(time.time() - init_time, flush=True)
-            return 400
+            print('ERROR ', time.time() - init_time, flush=True)
         print(time.time() - init_time, flush=True)
-        return 201

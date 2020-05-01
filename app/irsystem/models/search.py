@@ -29,27 +29,57 @@ cases_rocchio = Rocchio(cases_rank_info)
 statutes_rocchio = Rocchio(statutes_rank_info)
 reddit_rocchio = Rocchio(reddit_rank_info)
 
-def rankingFilter(reg_model, doc_rankings, query, content_dict, pass_through=False, reddit_range_utc=None):
+def plainFilter(doc_rankings, content_dict, reddit_range_utc=None):
     ret = []
-    relevant_docs = reg_model.predictRelevance(query, doc_rankings, pass_through)
     for idx, doc_id in enumerate(doc_rankings):
         content = content_dict[doc_id]
-        if relevant_docs[idx] == 1 and reddit_range_utc is None:
+        if reddit_range_utc is None:
             ret.append((content[0], content[1][0:min(len(content[1]), 3000):1],
                 doc_id, content[3]))
-        elif relevant_docs[idx] == 1 and not reddit_range_utc is None:
+        elif content[4] >= reddit_range_utc[0] and content[4] <= reddit_range_utc[1]:
+            ret.append((content[0], content[1][0:min(len(content[1]), 3000):1],
+                doc_id, content[3]))
+    return ret
+
+def rocchioFilter(query, relevance_data, rocchio, rank_info, doc_rankings, content_dict, upper_limit, reddit_range_utc=None):
+    if query in relevance_data:
+        rocchio.addMultipleTraining(query, relevance_data[query])
+        new_query = rocchio.produceNewQuery()
+        rocchio.resetAll()
+        new_doc_rankings = rank_info.getRankingsWithQueryVector(new_query, upper_limit)
+        return plainFilter(new_doc_rankings, content_dict, reddit_range_utc)
+    else:
+        return plainFilter(doc_rankings, content_dict, reddit_range_utc)
+
+def logRegFilter(query, relevance_data, log_reg, doc_rankings, content_dict, reddit_range_utc=None):
+    log_reg.addMultipleTraining(relevance_data)
+    predictions = log_reg.predictRelevance(query, doc_rankings)
+    log_reg.resetAll()
+    ret = []
+    for idx, doc_id in enumerate(doc_rankings):
+        content = content_dict[doc_id]
+        if predictions[idx] == 1 and reddit_range_utc is None:
+            ret.append((content[0], content[1][0:min(len(content[1]), 3000):1],
+                doc_id, content[3]))
+        elif predictions[idx] == 1 and not reddit_range_utc is None:
             if content[4] >= reddit_range_utc[0] and content[4] <= reddit_range_utc[1]:
                 ret.append((content[0], content[1][0:min(len(content[1]), 3000):1],
                     doc_id, content[3]))
     return ret
 
-def legalTipResp(query, upper_limit=100, reddit_range_utc=[0, 2 * (10**9)], ml_mode=0):
+def legalTipResp(query, upper_limit=100, reddit_range_utc=[0, 2 * (10**9)], ml_mode=0, relevance_feedbacks=None):
     '''
     parameters:
         query: string describing user legal help request for COVID-19
         upper_limit: maximum number of results to return per category
         reddit_range_utc: Time range to look for reddit posts
         ml_mode: 0 is no ML, 1 is Logistic Regression, 2 is Rocchio
+        relevance_feedbacks: Dictionary of:
+            {
+                'codes_info': {
+
+                }
+            }
     returns:
         dictionary in the form of
             {'legal_codes' : [
@@ -81,55 +111,72 @@ def legalTipResp(query, upper_limit=100, reddit_range_utc=[0, 2 * (10**9)], ml_m
     statutes_dict = statutes_data.statute_dict
 
     # Ranking for reddit
-    if ml_mode < 2 or reddit_rocchio.new_query is None:
-        pass_through = True if ml_mode == 0 else False
-        ret_reddit = rankingFilter(reddit_log_reg,
-            reddit_rank_info.getRankings(query, upper_limit),
-            query,
-            reddit_dict,
-            pass_through,
-            reddit_range_utc)
+    reddit_doc_rankings = reddit_rank_info.getRankings(query, upper_limit)
+    if relevance_feedbacks is None:
+        ret_reddit = plainFilter(reddit_doc_rankings, reddit_dict, reddit_range_utc)
+    elif ml_mode < 2:
+        if ml_mode == 0:
+            ret_reddit = plainFilter(reddit_doc_rankings, reddit_dict, reddit_range_utc)
+        else:
+            ret_reddit = logRegFilter(query,
+                relevance_feedbacks['reddit_info'],
+                reddit_log_reg,
+                reddit_doc_rankings,
+                reddit_dict,
+                reddit_range_utc)
     else:
-        pass_through = True
-        ret_reddit = rankingFilter(reddit_log_reg,
-            reddit_rank_info.getRankingsWithQueryVector(reddit_rocchio.new_query, upper_limit),
-            query,
+        ret_reddit = rocchioFilter(query,
+            relevance_feedbacks['reddit_info'],
+            reddit_rocchio,
+            reddit_rank_info,
+            reddit_doc_rankings,
             reddit_dict,
-            pass_through,
+            upper_limit,
             reddit_range_utc)
-
 
     # Ranking for cases
-    if ml_mode < 2 or cases_rocchio.new_query is None:
-        pass_through = True if ml_mode == 0 else False
-        ret_cases = rankingFilter(cases_log_reg,
-            cases_rank_info.getRankings(query, upper_limit),
-            query,
-            cases_dict,
-            pass_through)
+    cases_doc_rankings = cases_rank_info.getRankings(query, upper_limit)
+    if relevance_feedbacks is None:
+        ret_cases = plainFilter(cases_doc_rankings, cases_dict)
+    elif ml_mode < 2:
+        if ml_mode == 0:
+            ret_cases = plainFilter(cases_doc_rankings, cases_dict)
+        else:
+            ret_cases = logRegFilter(query,
+                relevance_feedbacks['cases_info'],
+                cases_log_reg,
+                cases_doc_rankings,
+                cases_dict)
     else:
-        pass_through = True
-        ret_cases = rankingFilter(cases_log_reg,
-            cases_rank_info.getRankingsWithQueryVector(cases_rocchio.new_query, upper_limit),
-            query,
+        ret_cases = rocchioFilter(query,
+            relevance_feedbacks['cases_info'],
+            cases_rocchio,
+            cases_rank_info,
+            cases_doc_rankings,
             cases_dict,
-            pass_through)
+            upper_limit)
 
     # Ranking for statutes
-    if ml_mode < 2 or statutes_rocchio.new_query is None:
-        pass_through = True if ml_mode == 0 else False
-        ret_statutes = rankingFilter(statutes_log_reg,
-            statutes_rank_info.getRankings(query, upper_limit),
-            query,
-            statutes_dict,
-            pass_through)
+    statutes_doc_rankings = statutes_rank_info.getRankings(query, upper_limit)
+    if relevance_feedbacks is None:
+        ret_statutes = plainFilter(statutes_doc_rankings, statutes_dict)
+    elif ml_mode < 2:
+        if ml_mode == 0:
+            ret_statutes = plainFilter(statutes_doc_rankings, statutes_dict)
+        else:
+            ret_statutes = logRegFilter(query,
+                relevance_feedbacks['codes_info'],
+                statutes_log_reg,
+                statutes_doc_rankings,
+                statutes_dict)
     else:
-        pass_through = True
-        ret_statutes = rankingFilter(statutes_log_reg,
-            statutes_rank_info.getRankingsWithQueryVector(statutes_rocchio.new_query, upper_limit),
-            query,
+        ret_statutes = rocchioFilter(query,
+            relevance_feedbacks['codes_info'],
+            statutes_rocchio,
+            statutes_rank_info,
+            statutes_doc_rankings,
             statutes_dict,
-            pass_through)
+            upper_limit)
 
     resp_object['legal_codes'] = ret_statutes
     resp_object['legal_cases'] = ret_cases
@@ -140,37 +187,3 @@ def legalTipResp(query, upper_limit=100, reddit_range_utc=[0, 2 * (10**9)], ml_m
         'reddit': reddit_rank_info.stop_words
     }
     return resp_object
-
-def feedbackRatings(query, relevant_doc_id, ml_mode=0):
-    '''
-    parameters:
-        query: original string query
-        relevant_doc_id: a [category, doc_id, ranking, is_relevant] 4 element list (basically a tuple)
-        that indicates whether doc_id in category is relevant to query;
-        ranking is the original ranking provided by the system for the
-        document in regards to its category (statutes, cases, reddit posts) and
-        is an integer 1...n
-        ml_mode: 0 is no ML, 1 is Logistic Regression, 2 is Rocchio
-    '''
-    if ml_mode == 0:
-        return 200
-    category = relevant_doc_id[0]
-    doc_id = relevant_doc_id[1]
-    label = 1 if relevant_doc_id[3] else -1
-    if ml_mode == 1:
-        if category == 'cases_info':
-            resp_code = cases_log_reg.addTraining(query, doc_id, label)
-        elif category == 'codes_info':
-            resp_code = statutes_log_reg.addTraining(query, doc_id, label)
-        else:
-            resp_code = reddit_log_reg.addTraining(query, doc_id, label)
-        return resp_code
-    elif ml_mode == 2:
-        if category == 'cases_info':
-            resp_code = cases_rocchio.addTraining(query, doc_id, label)
-        elif category == 'codes_info':
-            resp_code = statutes_rocchio.addTraining(query, doc_id, label)
-        else:
-            resp_code = reddit_rocchio.addTraining(query, doc_id, label)
-        return resp_code
-    return 400
