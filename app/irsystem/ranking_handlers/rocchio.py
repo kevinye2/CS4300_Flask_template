@@ -25,6 +25,9 @@ class Rocchio():
     def addMultipleTraining(self, query, relevance_data):
         self.cur_query = self.tfidf_obj.vectorizeQuery(query)
         for doc_id in relevance_data:
+            if not doc_id in self.doc_idx_dict:
+                self.resetAll()
+                return
             label = 1 if relevance_data[doc_id]['is_relevant'] else -1
             self.addTraining(doc_id, label)
 
@@ -43,6 +46,8 @@ class Rocchio():
                 self.cur_irrelevant_docs = sparse.vstack((self.cur_irrelevant_docs, data), format='csr')
 
     def produceNewQuery(self, a=0.9, b=0.9, c=0.6):
+        if self.cur_query is None:
+            return None
         asum = a * self.cur_query
         bsum = b * self.cur_relevant_docs.sum(axis=0) / self.cur_relevant_docs.shape[0] \
             if not self.cur_relevant_docs is None else None

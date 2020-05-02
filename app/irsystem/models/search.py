@@ -46,8 +46,11 @@ def rocchioFilter(query, relevance_data, rocchio, rank_info, doc_rankings, conte
         rocchio.addMultipleTraining(query, relevance_data[query])
         new_query = rocchio.produceNewQuery()
         rocchio.resetAll()
-        new_doc_rankings = rank_info.getRankingsWithQueryVector(new_query, upper_limit)
-        return plainFilter(new_doc_rankings, content_dict, reddit_range_utc)
+        if not new_query is None:
+            new_doc_rankings = rank_info.getRankingsWithQueryVector(new_query, upper_limit)
+            return plainFilter(new_doc_rankings, content_dict, reddit_range_utc)
+        else:
+            return plainFilter(doc_rankings, content_dict, reddit_range_utc)
     else:
         return plainFilter(doc_rankings, content_dict, reddit_range_utc)
 

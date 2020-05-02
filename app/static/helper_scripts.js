@@ -57,10 +57,11 @@ var searched_once = false;
 /*
   [number of likes, number of dislikes] for each feedback mode
 */
-var relevance_frequency = {
-  1: [0, 0],
-  2: [0, 0]
-}
+var log_reg_frequency = {
+  "codes_info": [0, 0],
+  "cases_info": [0, 0],
+  "reddit_info": [0, 0]
+};
 
 /*
   Detailed tracker of recorded feedback
@@ -143,14 +144,8 @@ function getLegalTips() {
   } else if (chosen_ml < 0) {
     alert("Please select a relevance feedback type");
     return;
-  } else if (chosen_ml > 0 &&
-    relevance_frequency[chosen_ml][0] != relevance_frequency[chosen_ml][1] &&
-    (relevance_frequency[chosen_ml][0] == 0 || relevance_frequency[chosen_ml][1] == 0)) {
-    if (chosen_ml === 1) {
-      alert("Please ensure you have a mix of feedback for Logistic Regression");
-    } else if (chosen_ml === 2) {
-      alert("Please ensure you have a mix of feedback for Rocchio");
-    }
+  } else if (chosen_ml === 1 && !checkLogRegFrequency()) {
+    alert("Please ensure you have a mix of feedback for each category for Logistic Regression");
     mixed_request = false;
   }
   request_json_obj = {
@@ -178,6 +173,14 @@ function getLegalTips() {
   requester.send(JSON.stringify(request_json_obj));
 }
 
+function checkLogRegFrequency() {
+  return !((log_reg_frequency["codes_info"][0] != log_reg_frequency["codes_info"][1] &&
+      (log_reg_frequency["codes_info"][0] == 0 || log_reg_frequency["codes_info"][1] == 0)) ||
+    (log_reg_frequency["cases_info"][0] != log_reg_frequency["cases_info"][1] &&
+      (log_reg_frequency["cases_info"][0] == 0 || log_reg_frequency["cases_info"][1] == 0)) ||
+    (log_reg_frequency["reddit_info"][0] != log_reg_frequency["reddit_info"][1] &&
+      (log_reg_frequency["reddit_info"][0] == 0 || log_reg_frequency["reddit_info"][1] == 0)))
+}
 /*
   Notifies corresponding http route that the document corresponding to elem
   is relevant to the query input
@@ -201,7 +204,7 @@ function sendRelevanceFeedback(elem) {
     "is_relevant": parseInt(elem.id.substring(0, 1), 10) === 1,
     "rank": parseInt(elem.dataset.rank, 10)
   };
-  relevance_frequency[chosen_ml][parseInt(elem.id.substring(0, 1), 10)] += 1;
+  log_reg_frequency[elem.dataset.category][parseInt(elem.id.substring(0, 1), 10)] += 1;
   if (parseInt(elem.dataset.yesrel, 10) === 1) {
     document.getElementById(elem.id).innerHTML = "Liked!";
     var temp_elem = document.getElementById('0' + elem.id.substring(1))

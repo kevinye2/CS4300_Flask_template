@@ -31,6 +31,10 @@ class LogReg():
             cur_query_vector = self.tfidf_obj.vectorizeQuery(cur_query)
             query_dict = relevance_data[cur_query]
             for doc_id in query_dict:
+                # If the doc_id does not exist then it must be a bad client request
+                if not doc_id in self.doc_idx_dict:
+                    self.resetAll()
+                    return
                 label = 1 if query_dict[doc_id]['is_relevant'] else -1
                 self.addTraining(cur_query_vector, doc_id, label)
         self.retrain()
@@ -70,7 +74,7 @@ class LogReg():
         try:
             self.log_reg_model = LogisticRegression(random_state=1) \
                 .fit(self.accum_training, self.accum_label)
-        except Exception:
-            self.log_reg_model = None
-            print('ERROR ', time.time() - init_time, flush=True)
-        print(time.time() - init_time, flush=True)
+        except Exception as e:
+            self.resetAll()
+            print('ERROR: ', e, '\n\n', 'Time: ', time.time() - init_time, flush=True)
+        print('Time: ', time.time() - init_time, flush=True)
