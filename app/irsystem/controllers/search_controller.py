@@ -13,6 +13,41 @@ def initializeTemplate():
 
 @irsystem.route('/postquery', methods=['POST'])
 def handleQuery():
+	'''
+	The EXPECTED incoming request is a json of the form:
+	{
+		max_res: integer representing the number of maximum results to be returned per category,
+		ml_mode: integer identifier in the range [0, 1, 2], with 0 being no relevance feedback,
+			1 representing logistic regression, and 2 representing Rocchio,
+		query: Query string with alphanumeric characters only,
+		reddit_range_utc: array of length 2 specifying the beginning and end UTC
+			time in seconds of reddit posts that should be returned, ie. [1000000000, 2000000000],
+		relevance_feedbacks: a json object (dictionary) of the form:
+		{
+			'codes_info':
+			{
+				'query':
+				{
+					'doc_id':
+					{
+						is_relevant: true or false,
+						ranking: original ranking of document, integer
+					},
+					...
+				},
+				...
+			},
+			'cases_info':
+			{
+				[same format as 'codes_info']
+			},
+			'reddit_info':
+			{
+				[same format as 'codes_info']
+			}
+		}
+	}
+	'''
 	with mutex:
 		query = request.json.get('query')
 		max_res = int(request.json.get('max_res')) if not request.json.get('max_res') is None else 50
