@@ -1,9 +1,6 @@
-import re
 import json
 from app.irsystem.models.helpers import *
-import random
 import os
-import time
 
 class StatuteData():
     def __init__(self):

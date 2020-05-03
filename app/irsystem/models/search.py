@@ -1,7 +1,3 @@
-from . import *
-from app.irsystem.models.helpers import *
-import os
-import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from app.irsystem.data_handlers.redditdata import RedditData
 from app.irsystem.data_handlers.casedata import CaseData

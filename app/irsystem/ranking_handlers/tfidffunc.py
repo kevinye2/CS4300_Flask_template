@@ -1,7 +1,3 @@
-from app.irsystem.models.helpers import *
-import random
-import os
-import time
 import numpy as np
 from scipy import sparse
 from sklearn.metrics.pairwise import linear_kernel

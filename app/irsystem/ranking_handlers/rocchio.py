@@ -1,7 +1,3 @@
-from . import *
-from app.irsystem.models.helpers import *
-import random
-import os
 from scipy import sparse
 import numpy as np
 from app.irsystem.ranking_handlers.tfidffunc import TFIDFHolder

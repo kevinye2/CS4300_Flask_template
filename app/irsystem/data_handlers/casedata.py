@@ -1,15 +1,6 @@
-import re
-from flask import Flask, render_template, url_for, json
 import json
 from app.irsystem.models.helpers import *
-import random
-import requests
 import os
-import praw
-import time
-import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
-from bs4 import BeautifulSoup
 
 class CaseData():
     def __init__(self):
