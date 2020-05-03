@@ -55,7 +55,7 @@ var chosen_ml = -1;
 var searched_once = false;
 
 /*
-  [number of likes, number of dislikes] for each feedback mode
+  [number of likes, number of dislikes] for each category for logistic regression
 */
 var log_reg_frequency = {
   "codes_info": [0, 0],
@@ -204,7 +204,9 @@ function sendRelevanceFeedback(elem) {
     "is_relevant": parseInt(elem.id.substring(0, 1), 10) === 1,
     "rank": parseInt(elem.dataset.rank, 10)
   };
-  log_reg_frequency[elem.dataset.category][parseInt(elem.id.substring(0, 1), 10)] += 1;
+  if (chosen_ml === 1) {
+    log_reg_frequency[elem.dataset.category][parseInt(elem.id.substring(0, 1), 10)] += 1;
+  }
   if (parseInt(elem.dataset.yesrel, 10) === 1) {
     document.getElementById(elem.id).innerHTML = "Liked!";
     var temp_elem = document.getElementById('0' + elem.id.substring(1))
