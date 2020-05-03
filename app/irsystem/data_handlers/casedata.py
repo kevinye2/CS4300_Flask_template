@@ -37,8 +37,8 @@ class CaseData():
                 ...
             }
         Returns:
-            dictionary tuple of lists indexed on county, where the first element
-            of an entry list is a list of case IDs and the second element is an
+            Tuple of lists where the first element
+            is a list of case IDs and the second element is an
             array where each element is the corresponding text
             (title and body text concatenated together) for that case.
         '''
@@ -78,7 +78,7 @@ class CaseData():
         '''
         Parameters: str of a case description
 
-        Returns: str of a case description filtered to only show the opinion of the court 
+        Returns: str of a case description filtered to only show the opinion of the court
         '''
         opinion_of_the_court = 'opinion of the court:'
         len_opinion_of_the_court = len(opinion_of_the_court)
