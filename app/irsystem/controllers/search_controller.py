@@ -49,15 +49,25 @@ def handleQuery():
 	'''
 	with mutex:
 		query = request.json.get('query')
-		max_res = int(request.json.get('max_res')) if not request.json.get('max_res') is None else 50
+		if checkQueryInvalid(query):
+			return Response('Error: Query invalid', status=400,
+				content_type='text/plain')
+		max_res = request.json.get('max_res')
+		if checkMaxResInvalid(max_res):
+			return Response(response='Error: Max results number invalid', status=400,
+				content_type='text/plain')
 		reddit_range_utc = request.json.get('reddit_range_utc')
-		if not reddit_range_utc is None:
-			reddit_range_utc[0] = int(reddit_range_utc[0])
-			reddit_range_utc[1] = int(reddit_range_utc[1])
-		else:
-			reddit_range_utc = [0, 2 * (10**9)]
-		ml_mode = int(request.json.get('ml_mode')) if not request.json.get('ml_mode') is None else 0
+		if checkRedditRangeInvalid(reddit_range_utc):
+			return Response(response='Error: Reddit date range invalid', status=400,
+				content_type='text/plain')
+		ml_mode = request.json.get('ml_mode')
+		if checkMlModeInvalid(ml_mode):
+			return Response(response='Error: ml_mode invalid', status=400,
+				content_type='text/plain')
 		relevance_feedbacks = request.json.get('relevance_feedbacks')
 		resp_obj = legalTipResp(query, max_res, reddit_range_utc, ml_mode, relevance_feedbacks)
+		if resp_obj is None:
+			return Response(response='Error: relevance feedbacks invalid', status=400,
+				content_type='text/plain')
 		return Response(response=json.dumps(resp_obj), status=200,
 			content_type='application/json')

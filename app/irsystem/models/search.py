@@ -111,80 +111,69 @@ def legalTipResp(query, upper_limit=100, reddit_range_utc=[0, 2 * (10**9)], ml_m
     reddit_dict = reddit_data.reddit_dict
     statutes_dict = statutes_data.statute_dict
 
-    # Ranking for reddit
     reddit_doc_rankings = reddit_rank_info.getRankings(query, upper_limit)
-    if relevance_feedbacks is None:
-        ret_reddit = plainFilter(reddit_doc_rankings, reddit_dict, reddit_range_utc)
-    elif ml_mode < 2:
-        if ml_mode == 0:
+    cases_doc_rankings = cases_rank_info.getRankings(query, upper_limit)
+    statutes_doc_rankings = statutes_rank_info.getRankings(query, upper_limit)
+    try:
+        if relevance_feedbacks is None or ml_mode == 0:
             ret_reddit = plainFilter(reddit_doc_rankings, reddit_dict, reddit_range_utc)
-        else:
+            ret_cases = plainFilter(cases_doc_rankings, cases_dict)
+            ret_statutes = plainFilter(statutes_doc_rankings, statutes_dict)
+        elif ml_mode == 1:
             ret_reddit = logRegFilter(query,
                 relevance_feedbacks['reddit_info'],
                 reddit_log_reg,
                 reddit_doc_rankings,
                 reddit_dict,
                 reddit_range_utc)
-    else:
-        ret_reddit = rocchioFilter(query,
-            relevance_feedbacks['reddit_info'],
-            reddit_rocchio,
-            reddit_rank_info,
-            reddit_doc_rankings,
-            reddit_dict,
-            upper_limit,
-            reddit_range_utc)
-
-    # Ranking for cases
-    cases_doc_rankings = cases_rank_info.getRankings(query, upper_limit)
-    if relevance_feedbacks is None:
-        ret_cases = plainFilter(cases_doc_rankings, cases_dict)
-    elif ml_mode < 2:
-        if ml_mode == 0:
-            ret_cases = plainFilter(cases_doc_rankings, cases_dict)
-        else:
             ret_cases = logRegFilter(query,
                 relevance_feedbacks['cases_info'],
                 cases_log_reg,
                 cases_doc_rankings,
                 cases_dict)
-    else:
-        ret_cases = rocchioFilter(query,
-            relevance_feedbacks['cases_info'],
-            cases_rocchio,
-            cases_rank_info,
-            cases_doc_rankings,
-            cases_dict,
-            upper_limit)
-
-    # Ranking for statutes
-    statutes_doc_rankings = statutes_rank_info.getRankings(query, upper_limit)
-    if relevance_feedbacks is None:
-        ret_statutes = plainFilter(statutes_doc_rankings, statutes_dict)
-    elif ml_mode < 2:
-        if ml_mode == 0:
-            ret_statutes = plainFilter(statutes_doc_rankings, statutes_dict)
-        else:
             ret_statutes = logRegFilter(query,
                 relevance_feedbacks['codes_info'],
                 statutes_log_reg,
                 statutes_doc_rankings,
                 statutes_dict)
-    else:
-        ret_statutes = rocchioFilter(query,
-            relevance_feedbacks['codes_info'],
-            statutes_rocchio,
-            statutes_rank_info,
-            statutes_doc_rankings,
-            statutes_dict,
-            upper_limit)
+        elif ml_mode == 2:
+            ret_reddit = rocchioFilter(query,
+                relevance_feedbacks['reddit_info'],
+                reddit_rocchio,
+                reddit_rank_info,
+                reddit_doc_rankings,
+                reddit_dict,
+                upper_limit,
+                reddit_range_utc)
+            ret_cases = rocchioFilter(query,
+                relevance_feedbacks['cases_info'],
+                cases_rocchio,
+                cases_rank_info,
+                cases_doc_rankings,
+                cases_dict,
+                upper_limit)
+            ret_statutes = rocchioFilter(query,
+                relevance_feedbacks['codes_info'],
+                statutes_rocchio,
+                statutes_rank_info,
+                statutes_doc_rankings,
+                statutes_dict,
+                upper_limit)
 
-    resp_object['legal_codes'] = ret_statutes
-    resp_object['legal_cases'] = ret_cases
-    resp_object['reddit_posts'] = ret_reddit
-    resp_object['stop_words'] = {
-        'statutes': statutes_rank_info.stop_words,
-        'cases': cases_rank_info.stop_words,
-        'reddit': reddit_rank_info.stop_words
-    }
-    return resp_object
+        resp_object['legal_codes'] = ret_statutes
+        resp_object['legal_cases'] = ret_cases
+        resp_object['reddit_posts'] = ret_reddit
+        resp_object['stop_words'] = {
+            'statutes': statutes_rank_info.stop_words,
+            'cases': cases_rank_info.stop_words,
+            'reddit': reddit_rank_info.stop_words
+        }
+        return resp_object
+    except Exception:
+        cases_log_reg.resetAll()
+        statutes_log_reg.resetAll()
+        reddit_log_reg.resetAll()
+        cases_rocchio.resetAll()
+        statutes_rocchio.resetAll()
+        reddit_rocchio.resetAll()
+        return None

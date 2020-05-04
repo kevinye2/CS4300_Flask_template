@@ -1,5 +1,4 @@
 import random
-import time
 import numpy as np
 from scipy import sparse
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -70,11 +69,8 @@ class LogReg():
         return prob_labels_sorted
 
     def retrain(self):
-        init_time = time.time()
         try:
             self.log_reg_model = LogisticRegression(random_state=1) \
                 .fit(self.accum_training, self.accum_label)
         except Exception as e:
             self.resetAll()
-            print('ERROR: ', e, '\n\n', 'Time: ', time.time() - init_time, flush=True)
-        print('Time: ', time.time() - init_time, flush=True)
