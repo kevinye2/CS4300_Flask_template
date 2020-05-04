@@ -5,6 +5,7 @@ from app.irsystem.data_handlers.statutedata import StatuteData
 from app.irsystem.ranking_handlers.tfidffunc import TFIDFHolder
 from app.irsystem.ranking_handlers.logreg import LogReg
 from app.irsystem.ranking_handlers.rocchio import Rocchio
+import requests
 
 try:
     requests.get('https://legal-pro-tips-wait.herokuapp.com')
