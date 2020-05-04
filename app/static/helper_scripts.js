@@ -220,6 +220,7 @@ function sendRelevanceFeedback(elem) {
       temp_elem.setAttribute("style", "display: none");
     }
   }
+  document.getElementById(elem.id).setAttribute("style", "background-image: linear-gradient(to right, #2724FF 0%, #4445BA 51%, #3535db 100%); background-size: 200%; border-width: 0px; color: white");
 }
 
 /*
@@ -233,7 +234,7 @@ function setCategory(elem) {
   $("#choose_reddit").attr("style", "background-color: inherit");
   chosen_category = elem !== undefined ? elem.dataset.category : "reddit_info_container";
   chosen_category_elem = elem
-  $("#" + elem.id).attr("style", "background-color: blue; color: white");
+  $("#" + elem.id).attr("style", "background-image: linear-gradient(to right, #2724FF 0%, #4445BA 51%, #3535db 100%); background-size: 200%; border-width: 0px; color: white");
   if (results_ready) {
     showResults();
     populateData();
@@ -248,7 +249,7 @@ function setML(elem) {
   $("#choose_no_ml").attr("style", "background-color: inherit");
   $("#choose_log_reg").attr("style", "background-color: inherit");
   $("#choose_rocchio").attr("style", "background-color: inherit");
-  $("#" + elem.id).attr("style", "background-color: blue; color: white");
+  $("#" + elem.id).attr("style", "background-image: linear-gradient(to right, #2724FF 0%, #4445BA 51%, #3535db 100%); background-size: 200%; border-width: 0px; color: white");
 }
 
 /*
@@ -362,6 +363,7 @@ function createIndividualResult(html_elem, id, link, title, content, rank) {
   var temp_id = "";
   var true_doc_id = id
   var yesrel = 0;
+  var custom_button_styling = "background-image: linear-gradient(to right, #2724FF 0%, #4445BA 51%, #3535db 100%); background-size: 200%; border-width: 0px; color: white";
   if (chosen_ml > 0 &&
     query in feedbacks_record[chosen_ml][html_elem.id] &&
     true_doc_id in feedbacks_record[chosen_ml][html_elem.id][query]) {
@@ -380,21 +382,21 @@ function createIndividualResult(html_elem, id, link, title, content, rank) {
       '<div class="fixed_container"><span class="link_no_runon">' +
       '<a style="color: #2A27F8" target="_blank" href="' + link + '" rel="nofollow noopener noreferrer">' +
       '</a></span><span class="no_runon"></span><br>' +
-      '<button class="transparent_button_small" style="display: inline-block" id=' + temp_id +
+      '<button class="transparent_button_small" id=' + temp_id +
       ' onclick="sendRelevanceFeedback(this)" data-rank="' + rank.toString() +
-      '" data-yesrel="' + yesrel + '" data-category="' + html_elem.id + '" style="font-size: 11px">' + msg + '</button></div>'
+      '" data-yesrel="' + yesrel + '" data-category="' + html_elem.id + '" style="display: inline-block; ' + custom_button_styling + '">' + msg + '</button></div>'
     );
   } else {
     html_elem.insertAdjacentHTML("beforeend",
       '<div class="fixed_container"><span class="link_no_runon">' +
       '<a target="_blank" href="' + link + '" rel="nofollow noopener noreferrer">' +
       '</a></span><span class="no_runon"></span><br>' +
-      '<button class="transparent_button_small" style="display: inline-block" id=' + '1' + true_doc_id +
+      '<button class="transparent_button_small" id=' + '1' + true_doc_id +
       ' onclick="sendRelevanceFeedback(this)" data-rank="' + rank.toString() +
-      '" data-yesrel="' + 1 + '" data-category="' + html_elem.id + '" style="font-size: 11px">Like</button>' +
-      '<button class="transparent_button_small" style="display: inline-block" id=' + '0' + true_doc_id +
+      '" data-yesrel="' + 1 + '" data-category="' + html_elem.id + '" style="display: inline-block">Like</button>' +
+      '<button class="transparent_button_small" id=' + '0' + true_doc_id +
       ' onclick="sendRelevanceFeedback(this)" data-rank="' + rank.toString() +
-      '" data-yesrel="' + 0 + '" data-category="' + html_elem.id + '" style="font-size: 11px">Dislike</button></div>'
+      '" data-yesrel="' + 0 + '" data-category="' + html_elem.id + '" style="display: inline-block">Dislike</button></div>'
     );
   }
 }

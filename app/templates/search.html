@@ -171,6 +171,19 @@
             }
           });
       });
+
+      /*
+        Setting up tooltip popup
+      */
+      $("#choose_no_ml").tooltip({
+        tooltipClass: "custom_tooltip_style"
+      });
+      $("#choose_log_reg").tooltip({
+        tooltipClass: "custom_tooltip_style"
+      });
+      $("#choose_rocchio").tooltip({
+        tooltipClass: "custom_tooltip_style"
+      });
     });
   </script>
 </head>
@@ -197,7 +210,8 @@ so any removal or modification may cause errors and unexpected behavior -->
         <h3>COVID is affecting everyone in unique ways, but one thing unites us all – our rights.</h3>
         <h3 style="color: #4445BA">If you're in Illinois, we're here to help.</h3>
       </div>
-      <h5><a style="color: white" target="_blank" rel="nofollow noopener noreferrer" href="https://legal-pro-tips.herokuapp.com">Open prototype 1</a></h5>
+      <h5 style="display: inline-block"><a style="color: white" target="_blank" rel="nofollow noopener noreferrer" href="https://legal-pro-tips.herokuapp.com">Prototype 1</a></h5>
+      <h5 style="display: inline-block"><a style="color: white" target="_blank" rel="nofollow noopener noreferrer" href="https://legal-pro-tips-v2.herokuapp.com">Prototype 2</a></h5>
       <form id="query_form" method="dialog">
         <!-- The custom CSS allows the query_input and county_selection to have
           equivalent vertical height and alignment, although imported themes
@@ -208,25 +222,25 @@ so any removal or modification may cause errors and unexpected behavior -->
         <button type="button" class="search_btn" id="query_submit" onclick="getLegalTips()">
           Search
         </button>
-        <div id="ml_option_area" style="width: 50%; padding-right: 5px; padding-top: 10px">
+        <div id="ml_option_area" style="width: 100%; padding-right: 5px; padding-top: 10px">
           <h5 style="display: inline-block; font-weight: bold">Relevance feedback mode:</h5>
-          <button type="button" class="transparent_button" id="choose_no_ml" data-mltype=0 onclick="setML(this)">
+          <button title="You cannot like/dislike documents in this mode." type="button" class="transparent_button" id="choose_no_ml" data-mltype=0 onclick="setML(this)">
             None
           </button>
-          <button type="button" class="transparent_button_wide" id="choose_log_reg" data-mltype=1 onclick="setML(this)">
+          <button title="Once you've liked/disliked some documents, reclick search to see updates. Make sure to have a mix of feedback per category. This mode works best if you ask for a large number of documents, as logistic regression reranks retrieved documents." type="button" class="transparent_button" id="choose_log_reg" data-mltype=1 onclick="setML(this)">
             Logistic Regression
           </button>
-          <button type="button" class="transparent_button" id="choose_rocchio" data-mltype=2 onclick="setML(this)">
+          <button title="Once you've liked/disliked some documents, reclick search to see updates." type="button" class="transparent_button" id="choose_rocchio" data-mltype=2 onclick="setML(this)">
             Rocchio
           </button>
         </div>
         <div class="input_filters_area">
-          <div id="reddit_slider_holder" style="width: 30%; padding-right: 5px; display: inline-block">
+          <div id="reddit_slider_holder" style="width: 40%; padding-right: 5px; display: inline-block">
             <h5 style="display: block; font-weight: bold">Filter Reddit results by date (UTC):</h5>
             <span id="date_range_disp" style="display: inline-block; padding-bottom: 10px"></span>
             <div id="reddit_date_range" style="width: 70%; background: white"></div>
           </div>
-          <div id="num_res_slider_holder" style="width: 30%; padding-right: 5px; display: inline-block">
+          <div id="num_res_slider_holder" style="width: 40%; padding-right: 5px; display: inline-block">
             <h5 style="display: block; font-weight: bold">Max number of results per category:</h5>
             <span id="num_res_range_disp" style="display: inline-block; padding-bottom: 10px">1</span>
             <div id="num_res_range" style="width: 70%; background: white"></div>
