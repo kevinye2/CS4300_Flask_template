@@ -34,9 +34,9 @@
         $("#reddit_date_range").slider({
           range: true,
           min: new Date("2019-12-01").getTime() / 1000,
-          max: new Date("2020-04-30").getTime() / 1000,
+          max: new Date("2020-05-04").getTime() / 1000,
           step: 86400,
-          values: [new Date("2019-12-01").getTime() / 1000, new Date("2020-04-30").getTime() / 1000],
+          values: [new Date("2019-12-01").getTime() / 1000, new Date("2020-05-04").getTime() / 1000],
           slide: function(event, date_val) {
             $("#date_range_disp").text(new Date(date_val.values[0] * 1000).toDateString() + ' to ' +
               new Date(date_val.values[1] * 1000).toDateString());
@@ -60,7 +60,7 @@
           Initializing text display of data attached to above sliders
         */
         $("#date_range_disp").text(new Date("2019-12-01").toDateString() + ' to ' +
-          new Date("2020-04-30").toDateString());
+          new Date("2020-05-04").toDateString());
         $("#num_res_range_disp").text(5);
 
         /*

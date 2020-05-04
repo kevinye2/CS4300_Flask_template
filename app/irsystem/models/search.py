@@ -6,12 +6,10 @@ from app.irsystem.ranking_handlers.tfidffunc import TFIDFHolder
 from app.irsystem.ranking_handlers.logreg import LogReg
 from app.irsystem.ranking_handlers.rocchio import Rocchio
 
-'''
 try:
     requests.get('https://legal-pro-tips-wait.herokuapp.com')
 except Exception:
     pass
-'''
 cases_data = CaseData()
 statutes_data = StatuteData()
 reddit_data = RedditData()

@@ -193,7 +193,7 @@ function sendRelevanceFeedback(elem) {
   }
   if (query in feedbacks_record[chosen_ml][elem.dataset.category] &&
     true_doc_id in feedbacks_record[chosen_ml][elem.dataset.category][query]) {
-    alert("Feedback already sent for this query and relevance feedback type");
+    alert("Feedback already given for this query and relevance feedback type");
     return;
   }
   if (!(query in feedbacks_record[chosen_ml][elem.dataset.category])) {
