@@ -8,7 +8,7 @@ from app.irsystem.ranking_handlers.rocchio import Rocchio
 import requests
 
 try:
-    requests.get('https://legal-pro-tips-wait.herokuapp.com')
+    requests.get('https://legal-pro-tips-waking.herokuapp.com')
 except Exception:
     pass
 cases_data = CaseData()
