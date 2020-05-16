@@ -86,6 +86,17 @@ var feedbacks_record = {
 };
 
 /*
+  Tracker of saved links
+  Key order:
+    category -> query -> doc_id -> { ranking: int }
+*/
+var saved_record = {
+  "codes_info": {},
+  "cases_info": {},
+  "reddit_info": {}
+};
+
+/*
   The total number of pages for the code, case, and reddit categories
 */
 var total_pages = {
@@ -118,7 +129,7 @@ var populate_status = {
 var results_ready = false;
 
 /*
-  Function that triggers upon a searh button press
+  Function that triggers upon a search button press
   The query is trimmed, turned entirely into lowercase, and excess whitespace
   between words is removed.
   There are various checks for the legitimacy of the inputs, including
@@ -131,7 +142,7 @@ function getLegalTips() {
   query = document.getElementById("query_input").value
   query = query.replace(/[^ 0-9a-z]+/gi, '')
   query = query.trim().toLowerCase();
-  query = query.split(" ").filter(function(c) {
+  query = query.split(" ").filter(function (c) {
     return c != "";
   }).join(" ");
   var requester = new XMLHttpRequest();
@@ -157,7 +168,7 @@ function getLegalTips() {
   };
   requester.open("POST", '/postquery', true);
   requester.setRequestHeader("Content-Type", "application/json");
-  requester.onreadystatechange = function() {
+  requester.onreadystatechange = function () {
     if (this.readyState == XMLHttpRequest.DONE && this.status === 200) {
       json_resp = JSON.parse(this.response);
       innerHTMLHandler(json_resp);
@@ -175,7 +186,7 @@ function getLegalTips() {
 
 function checkLogRegFrequency() {
   return !((log_reg_frequency["codes_info"][0] != log_reg_frequency["codes_info"][1] &&
-      (log_reg_frequency["codes_info"][0] == 0 || log_reg_frequency["codes_info"][1] == 0)) ||
+    (log_reg_frequency["codes_info"][0] == 0 || log_reg_frequency["codes_info"][1] == 0)) ||
     (log_reg_frequency["cases_info"][0] != log_reg_frequency["cases_info"][1] &&
       (log_reg_frequency["cases_info"][0] == 0 || log_reg_frequency["cases_info"][1] == 0)) ||
     (log_reg_frequency["reddit_info"][0] != log_reg_frequency["reddit_info"][1] &&
@@ -221,6 +232,19 @@ function sendRelevanceFeedback(elem) {
     }
   }
   document.getElementById(elem.id).setAttribute("style", "background-image: linear-gradient(to right, #2724FF 0%, #4445BA 51%, #3535db 100%); background-size: 200%; border-width: 0px; color: white");
+}
+
+/*
+  Notifies corresponding http route that the document is saved by the user
+*/
+function sendSaveFeedback(elem) {
+  console.log('hi')
+  var true_doc_id = elem.id.substring(1)
+  // Recording exact feedback details
+  saved_record[elem.dataset.category][query][true_doc_id] = {
+    "rank": parseInt(elem.dataset.rank, 10)
+  };
+  document.getElementById(elem.id).innerHTML = "Saved!";
 }
 
 /*
@@ -352,6 +376,13 @@ function clearHTMLElement(id) {
   while (temp.firstChild) {
     temp.removeChild(temp.firstChild);
   }
+}
+
+/*
+  Handles the saved results pop-up
+*/
+function updateSavedLinks(elem) {
+
 }
 
 /*
@@ -500,8 +531,8 @@ function addCleanText(id, max_length) {
 */
 function handleEllipsis(id, idxs, info_holder) {
   var pos = 0;
-  $("#" + id).find("div").each(function() {
-    $(this).find("span").each(function() {
+  $("#" + id).find("div").each(function () {
+    $(this).find("span").each(function () {
       if (pos >= idxs.length) {
         return;
       }

@@ -7,10 +7,11 @@
   <link rel="stylesheet" href="/static/bootstrap.min.css">
   <link rel="stylesheet" href="/static/main.css">
   <script src="/static/helper_scripts.js"></script>
-  <script src="https://code.jquery.com/jquery-3.5.0.min.js" integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ=" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.5.0.min.js"
+    integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ=" crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
   <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
       /*
         Sets the window width to the maximum value and prevents div shifting
         on window resize events
@@ -20,7 +21,7 @@
       /*
         Enter button keypress triggers app to send query to server
       */
-      $(document).keyup(function(event) {
+      $(document).keyup(function (event) {
         if (event.keyCode == 13) {
           event.preventDefault();
           getLegalTips();
@@ -30,14 +31,14 @@
       /*
         Initializing the reddit date range selector
       */
-      $(function() {
+      $(function () {
         $("#reddit_date_range").slider({
           range: true,
           min: new Date("2019-12-01").getTime() / 1000,
           max: new Date("2020-05-04").getTime() / 1000,
           step: 86400,
           values: [new Date("2019-12-01").getTime() / 1000, new Date("2020-05-04").getTime() / 1000],
-          slide: function(event, date_val) {
+          slide: function (event, date_val) {
             $("#date_range_disp").text(new Date(date_val.values[0] * 1000).toDateString() + ' to ' +
               new Date(date_val.values[1] * 1000).toDateString());
           }
@@ -51,7 +52,7 @@
           max: 100,
           step: 1,
           value: 5,
-          slide: function(event, val) {
+          slide: function (event, val) {
             $("#num_res_range_disp").text(val.value);
           }
         });
@@ -79,7 +80,7 @@
       /*
         Setting up autocomplete for the query
       */
-      $(function() {
+      $(function () {
         var key_words = [
           "rent",
           "rented",
@@ -137,7 +138,7 @@
           "epidemic"
         ];
         $("#query_input")
-          .on("keydown", function(event) {
+          .on("keydown", function (event) {
             if (event.keyCode == 9 && $(this).autocomplete("instance").menu.active) {
               event.preventDefault();
             }
@@ -147,15 +148,15 @@
               "ui-autocomplete": "custom_autocomplete_style"
             },
             minLength: 0,
-            source: function(req, resp) {
+            source: function (req, resp) {
               total_words = req.term.split(" ");
               last_word = total_words.pop();
               pre_words = total_words.join(" ");
-              potential_words = key_words.filter(function(in_str) {
+              potential_words = key_words.filter(function (in_str) {
                 return in_str.toLowerCase().indexOf(last_word.toLowerCase()) == 0;
               });
               is_cap = last_word.length > 0 && last_word[0] == last_word[0].toUpperCase();
-              potential_words = potential_words.map(function(in_str) {
+              potential_words = potential_words.map(function (in_str) {
                 if (is_cap) {
                   return pre_words + " " + in_str[0].toUpperCase() + in_str.substring(1);
                 } else {
@@ -165,10 +166,10 @@
               potential_words = potential_words.slice(0, Math.min(potential_words.length, 10));
               resp(potential_words);
             },
-            focus: function() {
+            focus: function () {
               return false;
             },
-            select: function(event, input_area) {
+            select: function (event, input_area) {
               this.value = input_area.item.value + " ";
               return false;
             }
@@ -226,13 +227,26 @@ so any removal or modification may cause errors and unexpected behavior -->
         <h3>COVID is affecting everyone in unique ways, but one thing unites us all – our rights.</h3>
         <h3 style="color: #4445BA">If you're in Illinois, we're here to help.</h3>
       </div>
-      <h5 style="display: inline-block"><a style="color: white" target="_blank" rel="nofollow noopener noreferrer" href="https://legal-pro-tips.herokuapp.com">Prototype 1</a></h5>
-      <h5 style="display: inline-block"><a style="color: white" target="_blank" rel="nofollow noopener noreferrer" href="https://legal-pro-tips-v2.herokuapp.com">Prototype 2</a></h5>
+      <h5 style="display: inline-block"><a style="color: white" target="_blank" rel="nofollow noopener noreferrer"
+          href="https://legal-pro-tips.herokuapp.com">Prototype 1</a></h5>
+      <h5 style="display: inline-block"><a style="color: white" target="_blank" rel="nofollow noopener noreferrer"
+          href="https://legal-pro-tips-v2.herokuapp.com">Prototype 2</a></h5>
       <div id="important_notices" style="display: none" title="Important Notices:">
         <p>Please do not input personally identifable information within queries.</p>
         <p>The UI only supports desktop views with 720p or higher resolutions.</p>
-        <p>If you leave the application idle for roughly 30 minutes or more, there may be an error upon clicking search. Please reload the page and wait if that happens.</p>
+        <p>If you leave the application idle for roughly 30 minutes or more, there may be an error upon clicking search.
+          Please reload the page and wait if that happens.</p>
         <p>This application does not provide actual legal advice. It is only a potential guide for legal issues.</p>
+      </div>
+      <div id="saved_form" style="display: none" title="Saved Links">
+        <button class="openSavedBtn" onclick="openForm()">Saved Links</button>
+        <div class="openSaved">
+          <form>
+            <h1>Saved Links</h1>
+            <textarea name="links" required></textarea>
+            <button type="button" class="closeSavedBtn" onclick="closeForm()">Close</button>
+          </form>
+        </div>
       </div>
       <form id="query_form" method="dialog">
         <!-- The custom CSS allows the query_input and county_selection to have
@@ -246,7 +260,8 @@ so any removal or modification may cause errors and unexpected behavior -->
         </button>
         <div id="ml_option_area" style="width: 100%; padding-right: 5px; padding-top: 10px">
           <h5 style="display: inline-block; font-weight: bold">Relevance feedback mode:</h5>
-          <button title="You cannot like/dislike documents in this mode." type="button" class="transparent_button" id="choose_no_ml" data-mltype=0 onclick="setML(this)">
+          <button title="You cannot like/dislike documents in this mode." type="button" class="transparent_button"
+            id="choose_no_ml" data-mltype=0 onclick="setML(this)">
             None
           </button>
           <button
@@ -254,7 +269,8 @@ so any removal or modification may cause errors and unexpected behavior -->
             type="button" class="transparent_button" id="choose_log_reg" data-mltype=1 onclick="setML(this)">
             Logistic Regression
           </button>
-          <button title="Once you've liked/disliked some documents, reclick search to see updates." type="button" class="transparent_button" id="choose_rocchio" data-mltype=2 onclick="setML(this)">
+          <button title="Once you've liked/disliked some documents, reclick search to see updates." type="button"
+            class="transparent_button" id="choose_rocchio" data-mltype=2 onclick="setML(this)">
             Rocchio
           </button>
         </div>
@@ -285,13 +301,16 @@ so any removal or modification may cause errors and unexpected behavior -->
       <div class="increase_padding left_right_padding" id="category_selection" style="visibility: hidden">
         <h2 style="font-weight: bold">Results</h2>
         <h5 style="display: inline-block">Filter results by type:</h5>
-        <button type="button" class="transparent_button" id="choose_codes" data-category="codes_info_container" onclick="setCategory(this)">
+        <button type="button" class="transparent_button" id="choose_codes" data-category="codes_info_container"
+          onclick="setCategory(this)">
           Legal statutes
         </button>
-        <button type="button" class="transparent_button" id="choose_cases" data-category="cases_info_container" onclick="setCategory(this)">
+        <button type="button" class="transparent_button" id="choose_cases" data-category="cases_info_container"
+          onclick="setCategory(this)">
           Legal cases
         </button>
-        <button type="button" class="transparent_button" id="choose_reddit" data-category="reddit_info_container" onclick="setCategory(this)">
+        <button type="button" class="transparent_button" id="choose_reddit" data-category="reddit_info_container"
+          onclick="setCategory(this)">
           Reddit
         </button>
       </div>
