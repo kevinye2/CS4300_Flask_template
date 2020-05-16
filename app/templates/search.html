@@ -2,10 +2,12 @@
 
 <head>
   <title>Legal ProTips</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+HK&display=swap" rel="stylesheet">
   <link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
   <link rel="stylesheet" href="/static/bootstrap.min.css">
   <link rel="stylesheet" href="/static/main.css">
+  <link rel="icon" href="/static/favicon/law-scales-image.png">
   <script src="/static/helper_scripts.js"></script>
   <script src="https://code.jquery.com/jquery-3.5.0.min.js" integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ=" crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
@@ -199,13 +201,37 @@
           of: "#clickable_body"
         },
         width: 600
+      })
+
+      // Open About Modal
+      $("#aboutBtn").click(function(event) {
+        $("#aboutModal")[0].style.display = "block";
       });
+
+      // When a user clicks anywhere outside of the modal or the X, close it
+      $(document).click(function(event) {
+        if (event.target == $("#aboutModal")[0] || event.target == $("#modalClose")[0]) {
+          $("#aboutModal")[0].style.display = "none";
+        }
+      })
     });
   </script>
 </head>
 <!-- The id and attributes of all elements are tightly coupled with helper_scripts.js,
 so any removal or modification may cause errors and unexpected behavior -->
 
+<button id="aboutBtn" class="about_button"> <i class="material-icons">info</i>About</button>
+<div id="aboutModal" class="modal">
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span id=modalClose class="close">&times;</span>
+    <p>Legal-Pro-Tips was built by Andrei Kozyrev, David Huang, Keivan Shahida, Kevin Ye, Lily Pagan at Cornell University. <br>
+      This was a project for CS/INFO 4300 during Spring 2020 and motivated by COVID-19. <br>
+      Code viewable on <a href="https://github.com/kevinye2/cs4300sp2020-aak85-dh558-ks963-ky242-lp398">Github</a>.</p>
+      <h5 style="display: inline-block"><a style="color: gray" target="_blank" rel="nofollow noopener noreferrer" href="https://legal-pro-tips.herokuapp.com">Prototype 1</a></h5>
+      <h5 style="display: inline-block"><a style="color: gray" target="_blank" rel="nofollow noopener noreferrer" href="https://legal-pro-tips-v2.herokuapp.com">Prototype 2</a></h5>
+  </div>
+</div>
 <body id="clickable_body">
   <!-- ultimate_div prevents the elements contained within from being shifted
   around during window resize events -->
@@ -226,8 +252,6 @@ so any removal or modification may cause errors and unexpected behavior -->
         <h3>COVID is affecting everyone in unique ways, but one thing unites us all – our rights.</h3>
         <h3 style="color: #4445BA">If you're in Illinois, we're here to help.</h3>
       </div>
-      <h5 style="display: inline-block"><a style="color: white" target="_blank" rel="nofollow noopener noreferrer" href="https://legal-pro-tips.herokuapp.com">Prototype 1</a></h5>
-      <h5 style="display: inline-block"><a style="color: white" target="_blank" rel="nofollow noopener noreferrer" href="https://legal-pro-tips-v2.herokuapp.com">Prototype 2</a></h5>
       <div id="important_notices" style="display: none" title="Important Notices:">
         <p>Please do not input personally identifable information within queries.</p>
         <p>The UI only supports desktop views with 720p or higher resolutions.</p>
