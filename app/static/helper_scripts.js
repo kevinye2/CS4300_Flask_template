@@ -100,7 +100,8 @@ var total_pages = {
 var cur_pages = {
   "codes_info": 1,
   "cases_info": 1,
-  "reddit_info": 1
+  "reddit_info": 1,
+  "liked_info": 1
 };
 
 /*
@@ -111,6 +112,11 @@ var populate_status = {
   "cases_info": false,
   "reddit_info": false
 };
+
+/*
+ Results liked by user
+*/
+var liked_results = [];
 
 /*
   True if the user has successfully requested results for a query
@@ -213,6 +219,23 @@ function sendRelevanceFeedback(elem) {
     if (temp_elem !== null) {
       temp_elem.setAttribute("style", "display: none");
     }
+    var sib_elem = $(elem).siblings();
+    var cur_ml_mode = chosen_ml === 1 ? "log. reg." : "rocchio";
+    if (sib_elem.length >= 2) {
+      var temp_dom = document.createElement("span");
+      temp_dom.innerHTML = sib_elem[0].innerHTML;
+      var temp_link = temp_dom.firstChild.getAttribute("href");
+      var insertion_data = [
+        "(query: " + query + ", feedback mode: " + cur_ml_mode + ") " + sib_elem[0].innerHTML,
+        sib_elem[1].innerHTML,
+        temp_link,
+        chosen_category
+      ];
+      liked_results.push(insertion_data);
+      if (liked_results.length <= results_per_page) {
+        createIndividualLikedResult(document.getElementById("liked_info"), temp_link);
+      }
+    }
   } else {
     document.getElementById(elem.id).innerHTML = "Disliked!";
     var temp_elem = document.getElementById('1' + elem.id.substring(1))
@@ -232,6 +255,7 @@ function setCategory(elem) {
   $("#choose_codes").attr("style", "background-color: inherit");
   $("#choose_cases").attr("style", "background-color: inherit");
   $("#choose_reddit").attr("style", "background-color: inherit");
+  $("#choose_liked").attr("style", "background-color: inherit");
   chosen_category = elem !== undefined ? elem.dataset.category : "reddit_info_container";
   chosen_category_elem = elem
   $("#" + elem.id).attr("style", "background-image: linear-gradient(to right, #2724FF 0%, #4445BA 51%, #3535db 100%); background-size: 200%; border-width: 0px; color: white");
@@ -266,6 +290,13 @@ function populateData() {
   } else if (chosen_category == "reddit_info_container" && !populate_status['reddit_info']) {
     populate_status['reddit_info'] = true;
     addCleanText("reddit_info", reddit.length);
+  } else if (chosen_category == "liked_info_container") {
+    var liked_page_click_elem = document.getElementById("liked_info_page_click");
+    total_pages["liked_info"] = Math.ceil(liked_results.length / results_per_page);
+    clearHTMLElement("liked_info_page_click");
+    createPageClickRange(liked_page_click_elem, "liked_info", 1, total_pages["liked_info"]);
+    pageChange(document.getElementById("liked_info"),
+      "liked_info", liked_results, cur_pages["liked_info"], true);
   }
 }
 
@@ -294,16 +325,13 @@ function innerHTMLHandler(json_resp) {
   createPageClickRange(cases_page_click_elem, "cases_info", 1, total_pages["cases_info"]);
   createPageClickRange(reddit_page_click_elem, "reddit_info", 1, total_pages["reddit_info"]);
   for (var i = 0; i < Math.min(codes.length, results_per_page); i++) {
-    createIndividualResult(codes_elem, codes[i][2], codes[i][3],
-      codes[i][0], codes[i][1], i + 1);
+    createIndividualResult(codes_elem, codes[i][2], codes[i][3], i + 1);
   }
   for (var i = 0; i < Math.min(cases.length, results_per_page); i++) {
-    createIndividualResult(cases_elem, cases[i][2], cases[i][3],
-      cases[i][0], cases[i][1], i + 1);
+    createIndividualResult(cases_elem, cases[i][2], cases[i][3], i + 1);
   }
   for (var i = 0; i < Math.min(reddit.length, results_per_page); i++) {
-    createIndividualResult(reddit_elem, reddit[i][2], reddit[i][3],
-      reddit[i][0], reddit[i][1], i + 1);
+    createIndividualResult(reddit_elem, reddit[i][2], reddit[i][3], i + 1);
   }
   document.getElementById("results_area").setAttribute("style", "visibility: visible");
   document.getElementById("category_selection").setAttribute("style", "visibility: visible");
@@ -319,6 +347,7 @@ function showResults() {
   $("#codes_info_container").attr("style", "display: none");
   $("#cases_info_container").attr("style", "display: none");
   $("#reddit_info_container").attr("style", "display: none");
+  $("#liked_info_container").attr("style", "display: none");
   $("#" + chosen_category).attr("style", "display: block");
 }
 
@@ -334,7 +363,8 @@ function clearResultsAndVariables() {
   cur_pages = {
     "codes_info": 1,
     "cases_info": 1,
-    "reddit_info": 1
+    "reddit_info": 1,
+    "liked_info": 1
   };
   clearHTMLElement("codes_info");
   clearHTMLElement("cases_info");
@@ -354,10 +384,17 @@ function clearHTMLElement(id) {
   }
 }
 
+function createIndividualLikedResult(html_elem, link) {
+  html_elem.insertAdjacentHTML("beforeend",
+    '<div class="fixed_container"><span class="link_no_runon">' +
+    '<a target="_blank" href="' + link + '" rel="nofollow noopener noreferrer">' +
+    '</a></span><span class="no_runon"></span></div>'
+  );
+}
 /*
   Inserts the framework HTML to display the relevant data
 */
-function createIndividualResult(html_elem, id, link, title, content, rank) {
+function createIndividualResult(html_elem, id, link, rank) {
   var msg = "Like";
   var msg2 = "Dislike";
   var temp_id = "";
@@ -380,7 +417,7 @@ function createIndividualResult(html_elem, id, link, title, content, rank) {
     }
     html_elem.insertAdjacentHTML("beforeend",
       '<div class="fixed_container"><span class="link_no_runon">' +
-      '<a style="color: #2A27F8" target="_blank" href="' + link + '" rel="nofollow noopener noreferrer">' +
+      '<a target="_blank" href="' + link + '" rel="nofollow noopener noreferrer">' +
       '</a></span><span class="no_runon"></span><br>' +
       '<button class="transparent_button_small" id=' + temp_id +
       ' onclick="sendRelevanceFeedback(this)" data-rank="' + rank.toString() +
@@ -433,7 +470,7 @@ function createPageClickRange(html_elem, id, start_page, total_pages) {
 /*
   Changes the data displayed based on the new page the user navigates to
 */
-function pageChange(html_elem, id, data, new_page) {
+function pageChange(html_elem, id, data, new_page, is_liked = false) {
   if (new_page == "next") {
     cur_pages[id] += 1;
   } else if (new_page == "previous") {
@@ -443,8 +480,11 @@ function pageChange(html_elem, id, data, new_page) {
   }
   clearHTMLElement(id);
   for (i = (cur_pages[id] - 1) * results_per_page; i < Math.min(cur_pages[id] * results_per_page, data.length); i++) {
-    createIndividualResult(html_elem, data[i][2], data[i][3],
-      data[i][0], data[i][1], i + 1);
+    if (!is_liked) {
+      createIndividualResult(html_elem, data[i][2], data[i][3], i + 1);
+    } else {
+      createIndividualLikedResult(html_elem, data[i][2]);
+    }
   }
   addCleanText(id, data.length);
 }
@@ -461,14 +501,16 @@ function handlePageClick(sel) {
     data = codes;
   } else if (sel.dataset.infoclass == "cases_info") {
     data = cases;
-  } else {
+  } else if (sel.dataset.infoclass == "reddit_info") {
     data = reddit;
+  } else if (sel.dataset.infoclass == "liked_info") {
+    data = liked_results;
   }
   document.getElementById("results_area").setAttribute("style", "visibility: hidden");
   document.getElementById("category_selection").setAttribute("style", "visibility: hidden");
   clearHTMLElement(sel.dataset.infoclass + "_page_click");
   pageChange(document.getElementById(sel.dataset.infoclass),
-    sel.dataset.infoclass, data, sel.dataset.pagenum);
+    sel.dataset.infoclass, data, sel.dataset.pagenum, sel.dataset.infoclass == "liked_info");
   var new_start = Math.max(1, cur_pages[sel.dataset.infoclass] - Math.floor(max_page_options / 2));
   createPageClickRange(document.getElementById(sel.dataset.infoclass + "_page_click"),
     sel.dataset.infoclass, new_start, total_pages[sel.dataset.infoclass]);
@@ -491,6 +533,8 @@ function addCleanText(id, max_length) {
     handleEllipsis(id, index_holder, cases);
   } else if (id == "reddit_info") {
     handleEllipsis(id, index_holder, reddit);
+  } else if (id == "liked_info") {
+    handleEllipsis(id, index_holder, liked_results);
   }
 }
 
@@ -515,11 +559,12 @@ function handleEllipsis(id, idxs, info_holder) {
       var cur_span = $(this);
       var max_height = parseFloat(cur_span.css("max-height"));
       var cur_a;
+      var stop_type = id == "liked_info" ? info_holder[cur_idx][3] : null;
       if (cur_span.find("a").length > 0) {
         var cur_a = $(cur_span.find("a").get(0));
-        cleaveText(cur_span, cur_a, max_height, clean_title, false, id);
+        cleaveText(cur_span, cur_a, max_height, clean_title, false, id, stop_type);
       } else {
-        cleaveText(cur_span, cur_span, max_height, clean_content, true, id);
+        cleaveText(cur_span, cur_span, max_height, clean_content, true, id, stop_type);
       }
     });
     pos++;
@@ -530,7 +575,7 @@ function handleEllipsis(id, idxs, info_holder) {
   Truncates text to fit within its div, places ellipses at the end, and "bolds"
   relevant query terms within the description text
 */
-function cleaveText(outer_wrap, inner_wrap, max_height, words, is_content, id) {
+function cleaveText(outer_wrap, inner_wrap, max_height, words, is_content, id, stop_type) {
   var temp = ""
   var all_html = words.split(" ");
   inner_wrap.html("");
@@ -554,7 +599,7 @@ function cleaveText(outer_wrap, inner_wrap, max_height, words, is_content, id) {
     var poss_strs = query.split(" ");
     for (var x = 0; x < poss_strs.length; x++) {
       var poss_str = poss_strs[x];
-      if (badString(poss_str) || stopWord(poss_str, id)) {
+      if (badString(poss_str) || stopWord(poss_str, id, stop_type)) {
         continue;
       }
       if (poss_str.length >= 3) {
@@ -578,9 +623,17 @@ function badString(str) {
 /*
   Determines if a string is a stop word for its category of text
 */
-function stopWord(poss_str, id) {
+function stopWord(poss_str, id, stop_type) {
   stop_words = {};
-  if (id == "codes_info") {
+  if (stop_type !== null) {
+    if (stop_type == "codes_info_container") {
+      stop_words = codes_stop_words;
+    } else if (stop_type == "cases_info_container") {
+      stop_words = cases_stop_words;
+    } else if (stop_type == "reddit_info_container") {
+      stop_words = reddit_stop_words;
+    }
+  } else if (id == "codes_info") {
     stop_words = codes_stop_words;
   } else if (id == "reddit_info") {
     stop_words = reddit_stop_words;

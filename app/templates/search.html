@@ -189,19 +189,6 @@
       $("#choose_rocchio").tooltip({
         tooltipClass: "custom_tooltip_style"
       });
-      $("#important_notices").dialog({
-        classes: {
-          "ui-dialog-content": "custom_dialog_style",
-          "ui-dialog-titlebar": "custom_dialog_style",
-          "ui-dialog": "custom_dialog_style",
-        },
-        position: {
-          my: "center",
-          at: "bottom",
-          of: "#clickable_body"
-        },
-        width: 600
-      })
 
       // Open About Modal
       $("#aboutBtn").click(function(event) {
@@ -213,25 +200,18 @@
         if (event.target == $("#aboutModal")[0] || event.target == $("#modalClose")[0]) {
           $("#aboutModal")[0].style.display = "none";
         }
-      })
+        if (event.target == $("#important_notices")[0] || event.target == $("#important_notices_close")[0]) {
+          $("#important_notices")[0].style.display = "none";
+        }
+      });
+
+      $("#important_notices")[0].style.display = "block";
     });
   </script>
 </head>
 <!-- The id and attributes of all elements are tightly coupled with helper_scripts.js,
 so any removal or modification may cause errors and unexpected behavior -->
 
-<button id="aboutBtn" class="about_button"> <i class="material-icons">info</i>About</button>
-<div id="aboutModal" class="modal">
-  <!-- Modal content -->
-  <div class="modal-content">
-    <span id=modalClose class="close">&times;</span>
-    <p>Legal-Pro-Tips was built by Andrei Kozyrev, David Huang, Keivan Shahida, Kevin Ye, Lily Pagan at Cornell University. <br>
-      This was a project for CS/INFO 4300 during Spring 2020 and motivated by COVID-19. <br>
-      Code viewable on <a href="https://github.com/kevinye2/cs4300sp2020-aak85-dh558-ks963-ky242-lp398">Github</a>.</p>
-      <h5 style="display: inline-block"><a style="color: gray" target="_blank" rel="nofollow noopener noreferrer" href="https://legal-pro-tips.herokuapp.com">Prototype 1</a></h5>
-      <h5 style="display: inline-block"><a style="color: gray" target="_blank" rel="nofollow noopener noreferrer" href="https://legal-pro-tips-v2.herokuapp.com">Prototype 2</a></h5>
-  </div>
-</div>
 <body id="clickable_body">
   <!-- ultimate_div prevents the elements contained within from being shifted
   around during window resize events -->
@@ -240,6 +220,19 @@ so any removal or modification may cause errors and unexpected behavior -->
             search_area: Where the user can input query, county, category
             results_area: Where the user can see the resulting documents
     -->
+    <button id="aboutBtn" class="about_button"> <i class="material-icons">info</i></button>
+    <div id="aboutModal" class="modal">
+      <!-- Modal content -->
+      <div class="modal-content">
+        <span id="modalClose" class="close">&times;</span>
+        <p>Legal-Pro-Tips was built by Andrei Kozyrev, David Huang, Keivan Shahida, Kevin Ye, Lily Pagan at Cornell University. <br>
+          This was a project for CS/INFO 4300 during Spring 2020 and motivated by COVID-19. <br>
+          Code viewable on <a a style="color: gray" target="_blank" rel="nofollow noopener noreferrer" href="https://github.com/kevinye2/cs4300sp2020-aak85-dh558-ks963-ky242-lp398">Github</a>.</p>
+        <h5 style="display: inline-block; color: gray"><a style="color: gray" target="_blank" rel="nofollow noopener noreferrer" href="https://legal-pro-tips.herokuapp.com">Prototype 1</a> | </h5>
+        <h5 style="display: inline-block; color: gray"><a style="color: gray" target="_blank" rel="nofollow noopener noreferrer" href="https://legal-pro-tips-v2.herokuapp.com">Prototype 2</a> | </h5>
+        <h5 style="display: inline-block; color: gray"><a style="color: gray" target="_blank" rel="nofollow noopener noreferrer" href="https://legal-pro-tips-final.herokuapp.com"> Original final prototype (milestone 5)</a></h5>
+      </div>
+    </div>
     <div id="search_area" class="center_view">
       <!-- The search_area is composed of a form with 3 elements:
               query_input: Where user inputs tet
@@ -251,12 +244,7 @@ so any removal or modification may cause errors and unexpected behavior -->
       <div style="width: inherit">
         <h3>COVID is affecting everyone in unique ways, but one thing unites us all – our rights.</h3>
         <h3 style="color: #4445BA">If you're in Illinois, we're here to help.</h3>
-      </div>
-      <div id="important_notices" style="display: none" title="Important Notices:">
-        <p>Please do not input personally identifable information within queries.</p>
-        <p>The UI only supports desktop views with 720p or higher resolutions.</p>
-        <p>If you leave the application idle for roughly 30 minutes or more, there may be an error upon clicking search. Please reload the page and wait if that happens.</p>
-        <p>This application does not provide actual legal advice. It is only a potential guide for legal issues.</p>
+        <br>
       </div>
       <form id="query_form" method="dialog">
         <!-- The custom CSS allows the query_input and county_selection to have
@@ -318,6 +306,9 @@ so any removal or modification may cause errors and unexpected behavior -->
         <button type="button" class="transparent_button" id="choose_reddit" data-category="reddit_info_container" onclick="setCategory(this)">
           Reddit
         </button>
+        <button type="button" class="transparent_button" id="choose_liked" data-category="liked_info_container" onclick="setCategory(this)">
+          Liked Results
+        </button>
       </div>
       <div class="middle_org" id="codes_info_container" style="display: none">
         <!-- The elements in codes_info_container are identical in purpose
@@ -343,6 +334,22 @@ so any removal or modification may cause errors and unexpected behavior -->
         <div class="page_click_area">
           <span class="increase_padding" id="reddit_info_page_click"></span>
         </div>
+      </div>
+      <div class="middle_org" id="liked_info_container" style="display: none">
+        <div class="left_shift_text" id="liked_info"></div>
+        <div class="page_click_area">
+          <span class="increase_padding" id="liked_info_page_click"></span>
+        </div>
+      </div>
+    </div>
+    <div id="important_notices" class="modal">
+      <div style="position: absolute; bottom: 0; left: 0; right: 0" class="modal-content">
+        <span id="important_notices_close" class="close">&times;</span>
+        <p>Please do not input personally identifable information within queries.</p>
+        <p>The UI only supports desktop views with 720p or higher resolutions.</p>
+        <p>If you leave the application idle for roughly 30 minutes or more, there may be an error upon clicking search. Please reload the page and wait if that happens.</p>
+        <p>This app will not remember your relevance feedback or like history if you exit the browser tab.</p>
+        <p>This application does not provide actual legal advice. It is only a potential guide for legal issues.</p>
       </div>
     </div>
   </div>
