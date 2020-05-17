@@ -204,12 +204,14 @@
         if (event.target == $("#aboutModal")[0] || event.target == $("#modalClose")[0]) {
           $("#aboutModal")[0].style.display = "none";
         }
-        if (event.target == $("#important_notices")[0] || event.target == $("#important_notices_close")[0]) {
+        if (event.target == $("#important_notices_close")[0]) {
           $("#important_notices")[0].style.display = "none";
         }
       });
 
-      $("#important_notices")[0].style.display = "block";
+      setTimeout(function() {
+        $("#important_notices")[0].style.display = "block";
+      }, 1000);
     });
   </script>
 </head>
