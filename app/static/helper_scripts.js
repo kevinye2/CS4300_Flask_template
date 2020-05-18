@@ -295,7 +295,8 @@ function populateData() {
     var liked_page_click_elem = document.getElementById("liked_info_page_click");
     total_pages["liked_info"] = Math.ceil(liked_results.length / results_per_page);
     clearHTMLElement("liked_info_page_click");
-    createPageClickRange(liked_page_click_elem, "liked_info", 1, total_pages["liked_info"]);
+    var new_start = Math.max(1, cur_pages["liked_info"] - Math.floor(max_page_options / 2));
+    createPageClickRange(liked_page_click_elem, "liked_info", new_start, total_pages["liked_info"]);
     pageChange(document.getElementById("liked_info"),
       "liked_info", liked_results, cur_pages["liked_info"], true);
   }
@@ -361,11 +362,12 @@ function clearResultsAndVariables() {
     "cases_info": false,
     "reddit_info": false
   };
+  var liked_cur_page = cur_pages["liked_info"];
   cur_pages = {
     "codes_info": 1,
     "cases_info": 1,
     "reddit_info": 1,
-    "liked_info": 1
+    "liked_info": liked_cur_page
   };
   clearHTMLElement("codes_info");
   clearHTMLElement("cases_info");
