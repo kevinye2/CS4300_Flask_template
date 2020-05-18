@@ -192,7 +192,7 @@ function checkLogRegFrequency() {
   is relevant to the query input
 */
 function sendRelevanceFeedback(elem) {
-  var true_doc_id = elem.id.substring(1)
+  var true_doc_id = elem.id.substring(1);
   elem.blur();
   if (chosen_ml === 0) {
     alert("You are not in feedback mode, please select one first");
