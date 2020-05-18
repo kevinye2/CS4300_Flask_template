@@ -22,9 +22,14 @@
       /*
         Enter button keypress triggers app to send query to server
       */
-      $(document).keyup(function(event) {
+      $(document).keydown(function(event) {
         if (event.keyCode == 13) {
           event.preventDefault();
+        }
+      });
+
+      $(document).keyup(function(event) {
+        if (event.keyCode == 13) {
           getLegalTips();
         }
       });
