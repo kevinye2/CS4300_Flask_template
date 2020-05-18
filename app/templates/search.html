@@ -204,7 +204,7 @@
         if (event.target == $("#aboutModal")[0] || event.target == $("#modalClose")[0]) {
           $("#aboutModal")[0].style.display = "none";
         }
-        if (event.target == $("#important_notices_close")[0]) {
+        if (event.target == $("#important_notices")[0] || event.target == $("#important_notices_close")[0]) {
           $("#important_notices")[0].style.display = "none";
         }
       });
@@ -212,6 +212,8 @@
       setTimeout(function() {
         $("#important_notices")[0].style.display = "block";
       }, 1000);
+
+      document.getElementById("query_input").focus();
     });
   </script>
 </head>
@@ -352,7 +354,7 @@ so any removal or modification may cause errors and unexpected behavior -->
       <div style="position: absolute; bottom: 0; left: 0; right: 0" class="modal-content">
         <span id="important_notices_close" class="close">&times;</span>
         <p>Please do not input personally identifable information within queries.</p>
-        <p>The UI only supports desktop views with 720p or higher resolutions.</p>
+        <p>The UI only supports desktop views with 720p or higher resolutions, and it does not support Internet Explorer.</p>
         <p>If you leave the application idle for roughly 30 minutes or more, there may be an error upon clicking search. Please reload the page and wait if that happens.</p>
         <p>This app will not remember your relevance feedback or like history if you exit the browser tab.</p>
         <p>This application does not provide actual legal advice. It is only a potential guide for legal issues.</p>

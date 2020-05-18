@@ -388,7 +388,7 @@ function clearHTMLElement(id) {
 function createIndividualLikedResult(html_elem, link) {
   html_elem.insertAdjacentHTML("beforeend",
     '<div class="fixed_container"><span class="link_no_runon">' +
-    '<a target="_blank" href="' + link + '" rel="nofollow noopener noreferrer">' +
+    '<a target="_blank" onclick="this.blur()" href="' + link + '" rel="nofollow noopener noreferrer">' +
     '</a></span><span class="no_runon"></span></div>'
   );
 }
@@ -418,7 +418,7 @@ function createIndividualResult(html_elem, id, link, rank) {
     }
     html_elem.insertAdjacentHTML("beforeend",
       '<div class="fixed_container"><span class="link_no_runon">' +
-      '<a target="_blank" href="' + link + '" rel="nofollow noopener noreferrer">' +
+      '<a target="_blank" onclick="this.blur()" href="' + link + '" rel="nofollow noopener noreferrer">' +
       '</a></span><span class="no_runon"></span><br>' +
       '<button class="transparent_button_small" id=' + temp_id +
       ' onclick="sendRelevanceFeedback(this)" data-rank="' + rank.toString() +
@@ -427,7 +427,7 @@ function createIndividualResult(html_elem, id, link, rank) {
   } else {
     html_elem.insertAdjacentHTML("beforeend",
       '<div class="fixed_container"><span class="link_no_runon">' +
-      '<a target="_blank" href="' + link + '" rel="nofollow noopener noreferrer">' +
+      '<a target="_blank" onclick="this.blur()" href="' + link + '" rel="nofollow noopener noreferrer">' +
       '</a></span><span class="no_runon"></span><br>' +
       '<button class="transparent_button_small" id=' + '1' + true_doc_id +
       ' onclick="sendRelevanceFeedback(this)" data-rank="' + rank.toString() +
