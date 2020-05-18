@@ -206,6 +206,7 @@
         }
         if (event.target == $("#important_notices")[0] || event.target == $("#important_notices_close")[0]) {
           $("#important_notices")[0].style.display = "none";
+          document.getElementById("query_input").focus();
         }
       });
 
